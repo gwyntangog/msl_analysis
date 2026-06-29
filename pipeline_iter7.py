@@ -205,16 +205,27 @@ def tau_callibrate(df):
 
 def tau_callibrate_step(df):
     current_tau = tau_callibrate(df)
+    values = current_tau
+    print(values)
+    print(f"current tau {current_tau}")
     while current_tau<=0:
         new_df = df
         new_df["a2_weight"] = new_df["a2_weight"] + 0.1
-        new_df["a1_weight"] = new_df["a1_weight"] - 0.25
-        new_df["a3_weight"] = new_df["a3_weight"] - 0.25
-        new_df["a4_weight"] = new_df["a4_weight"] - 0.25
+        new_df["a1_weight"] = new_df["a1_weight"] - 0.20
+        new_df["a3_weight"] = new_df["a3_weight"] - 0.20
+        new_df["a4_weight"] = new_df["a4_weight"] - 0.20
+        new_df["a5_weight"] = new_df["a5_weight"] - 0.20
+        new_cu_utility = 0
+        new_al_utility = 0
+        for i in range(1,6):
+            new_cu_utility += new_df[f"a{i}_weight"] * new_df[f"cu_a{i}_val"]
+            new_al_utility += new_df[f"a{i}_weight"] * new_df[f"al_a{i}_val"]
+        new_df["cu_utility"] = new_cu_utility
+        new_df["al_utility"] = new_al_utility
         return tau_callibrate_step(new_df)
     return current_tau
 
-#####################
+####################
 
 def ms_logit(utility_cu, utility_al, tau):
     """
@@ -240,54 +251,117 @@ product_df = pd.DataFrame(overall["product_data"])
 
 # COLLECT DATA FOR EACH REGION
 
-global_df.to_csv("test_global.csv")
+product_df.to_csv("test_product.csv")
 print(global_df.iloc[:,:2])
-
-exit
 
 regions_list = regional_df["region"].unique()
 new_df_data = []
+
 for region in regions_list:
+    current_region = regional_df[regional_df["region"] == region]
+
+    cu_price = current_region["copper_price_per_kg"].iloc[0]
+    al_price = current_region["aluminum_price_per_kg"].iloc[0]
+
     region_result = {}
+
     region_result["region"] = region
-    region_result["cu_material_cost"] = regional_df["copper_price_per_kg"]
-    region_result["al_material_cost"] = regional_df["aluminum_price_per_kg"]
-    region_result["cu_market_share_raw"] = regional_df["copper_product_market_share"]
-    region_result["al_market_share_raw"] = regional_df["aluminum_product_market_share"]
-    for i in range(1,6):
-        region_result[f"att_{i}_weight"] = regional_df[f"weight_attribute_{i}"]
-    for i in range(1,6):
-      region_result[f"a{i}_direction"] = global_df[f"direction_attribute_{i}"]
+    region_result["cu_material_cost"] = cu_price
+    region_result["al_material_cost"] = al_price
+    region_result["cu_market_share"] = current_region["copper_product_market_share"].iloc[0]
+    region_result["al_market_share"] = current_region["aluminum_product_market_share"].iloc[0]
+
+    for i in range(1, 6):
+        region_result[f"a{i}_weight"] = current_region[f"weight_attribute_{i}"].iloc[0]
+
+    for i in range(1, 6):
+        region_result[f"a{i}_direction"] = global_df[f"direction_attribute_{i}"].iloc[0]
+
     region_df = product_df[product_df["region"] == region]
-    for index, row in region_df.iterrows():
+
+    for _, row in region_df.iterrows():
+
         if row["dominant material"] == "cu":
-            region_result["cu_copper_kg"] = row['copper_kg']
+            region_result["cu_copper_kg"] = row["copper_kg"]
             region_result["cu_aluminum_kg"] = row["aluminum_kg"]
             region_result["cu_nonmaterial"] = row["non_material_cost_per_unit"]
-            # VALUE
-            region_result["cu_a1_val"] = row["non_material_cost_per_unit"] + row['copper_kg']* regional_df["copper_price_per_kg"]+ row["aluminum_kg"]* regional_df["aluminum_price_per_kg"]
-            for i in range(2,6):
-              region_result[f"cu_a{i}_val"] = row[f"attribute_{i}_value"]
+
+            region_result["cu_a1_val"] = (
+                row["non_material_cost_per_unit"]
+                + row["copper_kg"] * cu_price
+                + row["aluminum_kg"] * al_price
+            )
+
+            for i in range(2, 6):
+                region_result[f"cu_a{i}_val"] = row[f"attribute_{i}_value"]
+
         elif row["dominant material"] == "al":
-            region_result["al_copper_kg"] = row['copper_kg']
+            region_result["al_copper_kg"] = row["copper_kg"]
             region_result["al_aluminum_kg"] = row["aluminum_kg"]
             region_result["al_nonmaterial"] = row["non_material_cost_per_unit"]
-            # VALUE
-            region_result["al_a1_val"] = row["non_material_cost_per_unit"] + row['copper_kg']* regional_df["copper_price_per_kg"]+ row["aluminum_kg"]* regional_df["aluminum_price_per_kg"]
-            for i in range(2,6):
-              region_result[f"cu_a{i}_val"] = row[f"attribute_{i}_value"]
+
+            region_result["al_a1_val"] = (
+                row["non_material_cost_per_unit"]
+                + row["copper_kg"] * cu_price
+                + row["aluminum_kg"] * al_price
+            )
+
+            for i in range(2, 6):
+                region_result[f"al_a{i}_val"] = row[f"attribute_{i}_value"]
+
     new_df_data.append(region_result)
 
-# CREATE NEW DATAFRAME
-
 new_df = pd.DataFrame(new_df_data)
+
+# exit
+
+# regions_list = regional_df["region"].unique()
+# new_df_data = []
+# for region in regions_list:
+#     current_region = regional_df[regional_df["region"] == region]
+#     print(current_region)
+#     region_result = {}
+#     region_result["region"] = region
+#     region_result["cu_material_cost"] = current_region["copper_price_per_kg"]
+#     region_result["al_material_cost"] = current_region["aluminum_price_per_kg"]
+#     region_result["cu_market_share_raw"] = current_region["copper_product_market_share"]
+#     region_result["al_market_share_raw"] = current_region["aluminum_product_market_share"]
+#     for i in range(1,6):
+#         region_result[f"att_{i}_weight"] = current_region[f"weight_attribute_{i}"]
+#     for i in range(1,6):
+#       region_result[f"a{i}_direction"] = global_df[f"direction_attribute_{i}"]
+#     region_df = product_df[product_df["region"] == region]
+#     for index, row in region_df.iterrows():
+#         if row["dominant material"] == "cu":
+#             region_result["cu_copper_kg"] = row['copper_kg']
+#             region_result["cu_aluminum_kg"] = row["aluminum_kg"]
+#             region_result["cu_nonmaterial"] = row["non_material_cost_per_unit"]
+#             # VALUE
+#             region_result["cu_a1_val"] = row["non_material_cost_per_unit"] + row['copper_kg']* regional_df["copper_price_per_kg"]+ row["aluminum_kg"]* regional_df["aluminum_price_per_kg"]
+#             for i in range(2,6):
+#               region_result[f"cu_a{i}_val"] = row[f"attribute_{i}_value"]
+#         elif row["dominant material"] == "al":
+#             region_result["al_copper_kg"] = row['copper_kg']
+#             region_result["al_aluminum_kg"] = row["aluminum_kg"]
+#             region_result["al_nonmaterial"] = row["non_material_cost_per_unit"]
+#             # VALUE
+#             region_result["al_a1_val"] = row["non_material_cost_per_unit"] + row['copper_kg']* regional_df["copper_price_per_kg"]+ row["aluminum_kg"]* regional_df["aluminum_price_per_kg"]
+#             for i in range(2,6):
+#               region_result[f"cu_a{i}_val"] = row[f"attribute_{i}_value"]
+#     new_df_data.append(region_result)
+
+# # CREATE NEW DATAFRAME
+
+# new_df = pd.DataFrame(new_df_data)
+new_df.to_csv("test_post.csv")
 print(new_df.iloc[:, :2])
 # print(new_df.columns)
 # print("HERE")
 # print(new_df["a1_direction"])
 print("stop")
+print(new_df.columns)
 for att_num in range(1,5):
-    att_direction = new_df[f"a{att_num}_direction"]
+    att_direction = new_df[f"a{att_num}_direction"][0]
     # print(att_direction.columns)
     # print(f"att_direction IS {att_direction}")
     if att_direction == "positive":
@@ -320,9 +394,18 @@ for m in ["cu","al"]:
 
 new_df["cu_other_utility"] = new_df["cu_utility"] - new_df["cu_a1_callibrated"] * new_df["a1_weight"]
 # CALCULATE TAU VALUES
+new_df.to_csv("test_tau.csv")
+print(new_df[["region","cu_market_share","al_market_share","cu_utility","al_utility"]])
 
-new_df['tau_value'] = new_df.apply(tau_callibrate_step, axis=1)
+# CALLIBRATE TAU VALUES
+# for _, row in new_df.iterrows():
+#   print(row)
+#   row['tau_value'] = row.apply(tau_callibrate_step)
+#   print(row['tau_value'])
 
+new_df["tau_value"] = new_df.apply(tau_callibrate_step, axis=1)
+
+new_df.to_csv("test_after_tau.csv")
 # GENERATE MARKET SHARES
 
 def calc_product_cost(df, cu_material_cost =None, al_material_cost = None, current_product = "cu"):

@@ -1,0 +1,5 @@
+,region,copper_price_per_kg,aluminum_price_per_kg,copper_product_market_share,aluminum_product_market_share,weight_attribute_1,weight_attribute_2,weight_attribute_3,weight_attribute_4,weight_attribute_5
+0,United States,9.5,2.8,0.65,0.35,0.15,0.2,0.25,0.2,0.2
+1,China,9.8,2.15,0.45,0.55,0.35,0.15,0.15,0.15,0.2
+2,Europe,9.55,2.65,0.55,0.45,0.2,0.15,0.2,0.25,0.2
+3,India,10.1,2.55,0.4,0.6,0.4,0.1,0.1,0.15,0.25

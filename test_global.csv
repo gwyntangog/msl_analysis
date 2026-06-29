@@ -1,0 +1,2 @@
+,attribute_1,attribute_2,attribute_3,attribute_4,attribute_5,direction_attribute_1,direction_attribute_2,direction_attribute_3,direction_attribute_4,direction_attribute_5,attribute_1_min,attribute_1_max,attribute_2_min,attribute_2_max,attribute_3_min,attribute_3_max,attribute_4_min,attribute_4_max,attribute_5_min,attribute_5_max
+0,total_cost,material_continuity,electrical_performance,mechanical_integrity,thermal_performance,negative,positive,positive,positive,positive,25.0,45.0,0.8,0.95,0.65,0.85,0.6,0.8,0.55,0.75
