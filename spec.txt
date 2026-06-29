@@ -1,0 +1,76 @@
+SYSTEM DESIGN GOALS
+1. Take data on utility functions of several regions (currently four) with respect to COPPER
+DOMINATED PRODUCT and ALUMINUM DOMINATED PRODUCT.
+2. Expected input is outlined below. Three datasets.
+3. The expected output are the following:
+    - tau values per region
+    - graphs per region of the market share of copper where the following variable is varied
+        - copper price
+        - aluminum price
+        - ratio of copper to aluminum price
+
+EXPECTED INPUT
+there are 3 expected input data lists in tiers: global data, regional data, and product data.
+
+1. GLOBAL DATA (global_data)
+This is data TRUE ACROSS ALL REGIONS. The following fields are expected.
+
+"attribute_1": "total_cost", # THIS IS ALWAYS ATTRIBUTE 1
+"attribute_2": "material_continuity", # THIS IS ALWAYS ATTRIBUTE 2
+"attribute_3": "electrical_performance", # CAN CHANGE
+"attribute_4": "mechanical_integrity", # CAN CHANGE
+"attribute_5": "thermal_performance", # CAN CHANGE
+"direction_attribute_1": negative, # THIS CAN ONLY BE EITHER "positive" or "negative". "positive": means more is better. "negative" means less is better
+"direction_attribute_2": negative,
+"direction_attribute_3": negative,
+"direction_attribute_4": negative,
+"direction_attribute_5": negative,
+"attribute_1_min": 25.00, # MAKE SURE THE COST MATCHES FOR PRODUCT COST
+"attribute_1_max": 45.00,
+"attribute_2_min": 0.80,
+"attribute_2_max": 0.95,
+"attribute_3_min": 0.65,
+"attribute_3_max": 0.85,
+"attribute_4_min": 0.60,
+"attribute_4_max": 0.80,
+"attribute_5_min": 0.55,
+"attribute_5_max": 0.75
+
+
+2. REGIONAL DATA (regional_data)
+
+There should be 4 entries (or how many ever regions there are.)
+Currently, we are using "United States", "China", "India", "Europe".
+Each entry should have the following fields:
+
+{
+"region": "United States", # REGIONS IN REGIONAL DATA (regional_data) MUST MATCH the regions in PRODUCT DATA (product_data)
+"copper_price_per_kg": 15.35,
+"aluminum_price_per_kg": 3.45,
+"copper_product_market_share": 0.7, # SHOULD BE LESS THAN OR EQUAL TO 1.
+"aluminum_product_market_share": 0.3 # BOTH MARKET SHARES SHOULD ADD TO 1.
+"weight_attribute_1": ???????,
+"weight_attribute_2": ???????,
+"weight_attribute_3": ???????,
+"weight_attribute_4": ???????,
+"weight_attribute_5": ???????,
+}
+
+3. PRODUCT DATA (product_data)
+
+These values are different every product. There should be 8 entries (2 for each region, where on is copper dominant
+and the other is aluminum dominant).
+
+  {
+    "region": "China",  # REGIONS IN REGIONAL DATA (regional_data) MUST MATCH the regions in PRODUCT DATA (product_data)
+    "dominant material": "cu", # ENTRIES TO THIS COLUMN SHOULD EITHER BE "cu" OR "al" EXACTLY
+    "product": "EV Battery Cell-to-Cell Interconnect",
+    "copper_kg": 6.5,
+    "aluminum_kg": 0.0,
+    "total_mass_kg": 6.5,
+    "non_material_cost_per_unit": 35.00,
+    "attribute_2_value": 0.85,
+    "attribute_3_value": 0.70,
+    "attribute_4_value": 0.75,
+    "attribute_5_value": 0.75,
+  },
