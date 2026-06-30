@@ -298,49 +298,6 @@ def analysis(global_df, regional_df, product_df, product_name):
             bbox_inches="tight"
         )
         plt.close()
-    # def gen_graph(region, prices, ms_vals, xlabel = "", subtitle = None):
-    #     plt.ylim(-0.1, 1.1)
-    #     plt.plot(prices, ms_vals)
-    #     plt.xlabel(xlabel)
-    #     plt.ylabel("Market Share of Copper Product")
-    #     plt.suptitle(f"Market Share Trend for {product_name} in {region}")
-    #     if subtitle is not None:
-    #         plt.title(subtitle)
-    #     os.makedirs(f"iter8_graphs/{product_name}", exist_ok=True)
-    #     plt.savefig(f"iter8_graphs/{product_name}/{region}_{xlabel}.png", dpi=300, bbox_inches="tight")
-    #     plt.clf()
-        # ZOOMED IN
-        # plt.ylim(min(ms_vals), max(ms_vals))
-        # plt.plot(prices, ms_vals)
-        # plt.xlabel(xlabel)
-        # plt.ylabel("Market Share of Copper Product")
-        # plt.title(f"Market Share Trend for {product_name} in {region}")
-        # os.makedirs(f"iter8_graphs/{product_name}", exist_ok=True)
-        # plt.savefig(f"iter8_graphs/{product_name}/{region}_{xlabel}_zoomed.png", dpi=300, bbox_inches="tight")
-        # plt.clf()
-
-    # Get power constants
-
-    # def get_power_constants(base_ratio, x,y):
-    #     plt.plot(x, y)
-    #     plt.show()
-    #     plt.clf()
-
-    #     BASE = base_ratio
-
-    #     log_x = np.log(x)
-    #     log_y = np.log(y)
-    #     log_x = np.log(x)
-    #     log_y = np.log(y)
-    #     X = sm.add_constant(log_x)
-    #     results = sm.OLS(log_y, X).fit()
-    #     ln_A, beta = results.params
-    #     beta = beta/np.log(base_ratio)
-    #     A = np.exp(ln_A)
-    #     results = {"A_val": A, "beta_val": beta}
-    #     # print("A,beta,base_ratio")
-    #     # print(A, beta, base_ratio)
-    #     return results
 
     def fit_power_law(x, y):
         x = np.array(x)
@@ -379,11 +336,6 @@ def analysis(global_df, regional_df, product_df, product_name):
             ms_vals.append(ms)
         # print(f"ms_vals are {ms_vals}")
         gen_graph(region, prices, ms_vals, "Copper Price")
-
-    # VARY THE RATIO
-    # base_ratio = row["cu_material_cost"]/row["al_material_cost"]
-    # power_constants[region] = get_power_constants(base_ratio, prices, ms_vals)
-
 
 
     # VARY ALUMINUM
