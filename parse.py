@@ -7,7 +7,7 @@ from pipeline_iter8 import analysis
 
 all_pdfs = list(Path("iter8_pdfs").glob("*.pdf"))
 
-for pdf_path in all_pdfs[3:4]:
+for pdf_path in all_pdfs:
     variables = {}
 
     with fitz.open(pdf_path) as doc:
