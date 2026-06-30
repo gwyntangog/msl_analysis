@@ -410,7 +410,7 @@ power_constants = {}
 for index, row in new_df.iterrows():
     region = row["region"]
     ms_vals = []
-    prices = range(1,100)
+    prices = np.arange(5,20,0.1)
     for cost in prices:
         utility_cu = calc_utility(row, cost,"cu")
         utility_al = row["al_utility"]
@@ -424,7 +424,7 @@ for index, row in new_df.iterrows():
 for index, row in new_df.iterrows():
     region = row["region"]
     ms_vals = []
-    prices = range(1,100)
+    prices = np.arange(1.5,5,0.1)
     for cost in prices:
         utility_cu = row["cu_utility"]
         utility_al = calc_utility(row, cost, "al")
