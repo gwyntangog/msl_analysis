@@ -259,7 +259,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             utility = df["al_other_utility"] + callibrated_product_cost * df["a1_weight"]
         return utility
 
-    def gen_graph(region, prices, ms_vals, xlabel="", subtitle=None):
+    def gen_graph(region, prices, ms_vals, xlabel="", subtitle=None, x_special = None, y_special = None):
         plt.figure(figsize=(7, 4.5))
 
         # main line (model)
@@ -267,6 +267,16 @@ def analysis(global_df, regional_df, product_df, product_name):
 
         # add light markers (helps see actual sampled points)
         plt.scatter(prices[::5], ms_vals[::5], s=18, color="black", alpha=0.6, label="Sample points")
+        # if x_special and y_special:
+        #     plt.scatter(
+        #         x_special,
+        #         y_special,
+        #         color="red",
+        #         s=100,           # marker size
+        #         marker="o",      # circle
+        #         zorder=5,        # draw on top of the line
+        #         label="Observed point"
+        #     )
 
         # axes limits
         plt.ylim(-0.05, 1.05)
@@ -335,7 +345,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
         # print(f"ms_vals are {ms_vals}")
-        gen_graph(region, prices, ms_vals, "Copper Price")
+        gen_graph(region, prices, ms_vals, "Copper Price", None, row["cu_material_cost"], row["cu_market_share"])
 
 
     # VARY ALUMINUM
@@ -353,7 +363,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
         # print(f"ms_vals are {ms_vals}")
-        gen_graph(region, prices, ms_vals, "Aluminum Price")
+        gen_graph(region, prices, ms_vals, "Aluminum Price", None, row["al_material_cost"], row["cu_market_share"])
 
     # GRAPH
         # BASELINE CHECK THE POINT
@@ -378,13 +388,13 @@ def analysis(global_df, regional_df, product_df, product_name):
         # print(f"ms_vals are {ms_vals}")
         print("power law results")
         print(fit_power_law(ratios, ms_vals))
-        gen_graph(region, ratios, ms_vals, "Ratio of Copper Price to Aluminum Price")
+        gen_graph(region, ratios, ms_vals, "Ratio of Copper Price to Aluminum Price",None, row["cu_material_cost"]/row["al_material_cost"], row["cu_market_share"])
 
         # POWER LAW RESULTS
         a,b, model = fit_power_law(ratios, ms_vals)
         x = np.arange(2,6, 0.1)
         y = a*(x**b)
-        gen_graph(region, x, y, f"Fitted Ratio of Copper Price to Aluminum Price", f"Power curve with A = {np.round(a,3)}, beta = {np.round(b,3)}")
+        gen_graph(region, x, y, f"Fitted Ratio of Copper Price to Aluminum Price", f"Power curve with A = {np.round(a,3)}, beta = {np.round(b,3)}", row["cu_material_cost"]/row["al_material_cost"], row["cu_market_share"])
 
     # delta_u = np.linspace(-5, 5, 500)
 
