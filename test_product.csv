@@ -1,9 +1,9 @@
 ,region,dominant material,product,copper_kg,aluminum_kg,total_mass_kg,non_material_cost_per_unit,attribute_2_value,attribute_3_value,attribute_4_value,attribute_5_value
-0,United States,cu,EV Wire Harness,22.0,2.0,45.0,350.0,0.9,0.85,0.4,0.9
-1,United States,al,EV Wire Harness,5.0,9.5,32.5,420.0,0.2,0.8,0.7,0.65
-2,China,cu,EV Wire Harness,16.0,4.0,35.0,180.0,0.55,0.9,0.65,0.75
-3,China,al,EV Wire Harness,4.0,7.0,25.5,230.0,0.65,0.85,0.85,0.6
-4,Europe,cu,EV Wire Harness,15.0,5.0,38.0,400.0,0.75,0.95,0.8,0.85
-5,Europe,al,EV Wire Harness,3.5,7.5,27.0,460.0,0.4,0.9,0.92,0.7
-6,India,cu,EV Wire Harness,12.0,0.5,26.0,110.0,0.95,0.75,0.3,0.8
-7,India,al,EV Wire Harness,3.0,5.5,19.0,160.0,0.15,0.7,0.6,0.55
+0,United States,cu,EV Battery Cell-to-Cell Interconnect,0.85,0.05,0.9,26.11,0.92,0.85,0.78,0.75
+1,United States,al,EV Battery Cell-to-Cell Interconnect,0.05,0.52,0.57,27.45,0.84,0.74,0.68,0.62
+2,China,cu,EV Battery Cell-to-Cell Interconnect,0.8,0.05,0.85,27.67,0.82,0.81,0.71,0.75
+3,China,al,EV Battery Cell-to-Cell Interconnect,0.05,0.5,0.55,23.41,0.94,0.7,0.64,0.62
+4,Europe,cu,EV Battery Cell-to-Cell Interconnect,0.85,0.05,0.9,25.44,0.9,0.84,0.79,0.75
+5,Europe,al,EV Battery Cell-to-Cell Interconnect,0.05,0.5,0.55,27.9,0.86,0.72,0.74,0.62
+6,India,cu,EV Battery Cell-to-Cell Interconnect,0.78,0.05,0.83,26.69,0.81,0.77,0.66,0.75
+7,India,al,EV Battery Cell-to-Cell Interconnect,0.05,0.45,0.5,27.14,0.89,0.66,0.61,0.62
