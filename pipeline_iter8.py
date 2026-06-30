@@ -32,7 +32,7 @@ def analysis(global_df, regional_df, product_df, product_name):
         utility_al = df["al_utility"]
         market_share_cu = df["cu_market_share"]
 
-        mc = min(max(market_share_cu, 10**(-20)), 1-10**(-20))
+        mc = min(max(market_share_cu, 10**(-9)), 1-10**(-9))
         tau = (utility_cu-utility_al)/(np.log(mc)-np.log(1-mc))
         return tau
 
@@ -45,7 +45,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             current_tau = tau_callibrate(current_df)
             print(f"at {iter_num} with tau_val {current_tau}")
             # if prev_tau is not None and abs(current_tau - prev_tau) < 1e-6:
-            if current_tau >= 0:
+            if current_tau >= 0.0000001:
                 current_df["num_callibrations"] = iter_num
                 current_df["tau_value"] = current_tau
                 return current_df
@@ -259,15 +259,56 @@ def analysis(global_df, regional_df, product_df, product_name):
             utility = df["al_other_utility"] + callibrated_product_cost * df["a1_weight"]
         return utility
 
-    def gen_graph(region, prices, ms_vals, xlabel = ""):
-        plt.ylim(-0.1, 1.1)
-        plt.plot(prices, ms_vals)
-        plt.xlabel(xlabel)
-        plt.ylabel("Market Share of Copper Product")
-        plt.title(f"Market Share Trend for {product_name} in {region}")
+    def gen_graph(region, prices, ms_vals, xlabel="", subtitle=None):
+        plt.figure(figsize=(7, 4.5))
+
+        # main line (model)
+        plt.plot(prices, ms_vals, linewidth=2.5, color="tab:blue", label="Model")
+
+        # add light markers (helps see actual sampled points)
+        plt.scatter(prices[::5], ms_vals[::5], s=18, color="black", alpha=0.6, label="Sample points")
+
+        # axes limits
+        plt.ylim(-0.05, 1.05)
+
+        # grid (huge readability boost)
+        plt.grid(True, linestyle="--", alpha=0.3)
+
+        # labels
+        plt.xlabel(xlabel, fontsize=11)
+        plt.ylabel("Copper Market Share", fontsize=11)
+
+        # titles
+        plt.suptitle(f"{product_name} — {region}", fontsize=13, fontweight="bold")
+
+        if subtitle:
+            plt.title(subtitle, fontsize=10)
+
+        # legend
+        plt.legend()
+
+        # layout tightening (prevents clipping)
+        plt.tight_layout()
+
+        # save
         os.makedirs(f"iter8_graphs/{product_name}", exist_ok=True)
-        plt.savefig(f"iter8_graphs/{product_name}/{region}_{xlabel}.png", dpi=300, bbox_inches="tight")
-        plt.clf()
+        plt.savefig(
+            f"iter8_graphs/{product_name}/{region}_{xlabel}.png",
+            dpi=300,
+            bbox_inches="tight"
+        )
+        plt.close()
+    # def gen_graph(region, prices, ms_vals, xlabel = "", subtitle = None):
+    #     plt.ylim(-0.1, 1.1)
+    #     plt.plot(prices, ms_vals)
+    #     plt.xlabel(xlabel)
+    #     plt.ylabel("Market Share of Copper Product")
+    #     plt.suptitle(f"Market Share Trend for {product_name} in {region}")
+    #     if subtitle is not None:
+    #         plt.title(subtitle)
+    #     os.makedirs(f"iter8_graphs/{product_name}", exist_ok=True)
+    #     plt.savefig(f"iter8_graphs/{product_name}/{region}_{xlabel}.png", dpi=300, bbox_inches="tight")
+    #     plt.clf()
         # ZOOMED IN
         # plt.ylim(min(ms_vals), max(ms_vals))
         # plt.plot(prices, ms_vals)
@@ -278,27 +319,49 @@ def analysis(global_df, regional_df, product_df, product_name):
         # plt.savefig(f"iter8_graphs/{product_name}/{region}_{xlabel}_zoomed.png", dpi=300, bbox_inches="tight")
         # plt.clf()
 
-    def get_power_constants(base_ratio, x,y):
-        plt.plot(x, y)
-        plt.show()
-        plt.clf()
+    # Get power constants
 
-        BASE = base_ratio
+    # def get_power_constants(base_ratio, x,y):
+    #     plt.plot(x, y)
+    #     plt.show()
+    #     plt.clf()
+
+    #     BASE = base_ratio
+
+    #     log_x = np.log(x)
+    #     log_y = np.log(y)
+    #     log_x = np.log(x)
+    #     log_y = np.log(y)
+    #     X = sm.add_constant(log_x)
+    #     results = sm.OLS(log_y, X).fit()
+    #     ln_A, beta = results.params
+    #     beta = beta/np.log(base_ratio)
+    #     A = np.exp(ln_A)
+    #     results = {"A_val": A, "beta_val": beta}
+    #     # print("A,beta,base_ratio")
+    #     # print(A, beta, base_ratio)
+    #     return results
+
+    def fit_power_law(x, y):
+        x = np.array(x)
+        y = np.array(y)
+
+        # remove invalid values
+        mask = (x > 0) & (y > 0)
+        x = x[mask]
+        y = y[mask]
 
         log_x = np.log(x)
         log_y = np.log(y)
-        log_x = np.log(x)
-        log_y = np.log(y)
+
         X = sm.add_constant(log_x)
-        results = sm.OLS(log_y, X).fit()
-        ln_A, beta = results.params
-        beta = beta/np.log(base_ratio)
-        A = np.exp(ln_A)
-        results = {"A_val": A, "beta_val": beta}
-        # print("A,beta,base_ratio")
-        # print(A, beta, base_ratio)
-        return results
+        model = sm.OLS(log_y, X).fit()
 
+        ln_a = model.params[0]
+        b = model.params[1]
+        a = np.exp(ln_a)
+
+        return a, b, model
 
     # GENERATE VALUES AND GRAPHS FOR EACH REGION
     # VARY COPPER AND GET POWER CONSTANTS
@@ -340,6 +403,12 @@ def analysis(global_df, regional_df, product_df, product_name):
         # print(f"ms_vals are {ms_vals}")
         gen_graph(region, prices, ms_vals, "Aluminum Price")
 
+    # GRAPH
+        # BASELINE CHECK THE POINT
+        # INCLUDE THE AMOUNT OF ERROR
+        # ADD TWO LINES TO BOTH
+        # MAKE IT CUTE
+
     # VARY RATIO
     for index, row in new_df.iterrows():
         region = row["region"]
@@ -355,7 +424,15 @@ def analysis(global_df, regional_df, product_df, product_name):
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
         # print(f"ms_vals are {ms_vals}")
+        print("power law results")
+        print(fit_power_law(ratios, ms_vals))
         gen_graph(region, ratios, ms_vals, "Ratio of Copper Price to Aluminum Price")
+
+        # POWER LAW RESULTS
+        a,b, model = fit_power_law(ratios, ms_vals)
+        x = np.arange(2,6, 0.1)
+        y = a*(x**b)
+        gen_graph(region, x, y, f"Fitted Ratio of Copper Price to Aluminum Price", f"Power curve with A = {np.round(a,3)}, beta = {np.round(b,3)}")
 
     # delta_u = np.linspace(-5, 5, 500)
 
