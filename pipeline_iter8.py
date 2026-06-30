@@ -71,20 +71,24 @@ def analysis(global_df, regional_df, product_df, product_name):
 
     ######## tau_callibrate_step
 
-    def tau_callibrate_step(df, max_iter=50):
-        current_df = df.copy()
+    def tau_callibrate_step(current_df, max_iter=50):
 
-        for _ in range(max_iter):
+        for iter_num in range(max_iter):
+            # print(f"currently at step {one_iter}")
             current_tau = tau_callibrate(current_df)
 
             if current_tau > 0:
-                return current_tau
+                current_df["num_callibrations"] = iter_num
+                current_df["tau_value"] = current_tau
+                return current_df
+
+            # print(current_df)
 
             current_df["a2_weight"] += 0.1
-            current_df["a1_weight"] -= 0.2
-            current_df["a3_weight"] -= 0.2
-            current_df["a4_weight"] -= 0.2
-            current_df["a5_weight"] -= 0.2
+            current_df["a1_weight"] -= 0.025
+            current_df["a3_weight"] -= 0.025
+            current_df["a4_weight"] -= 0.025
+            current_df["a5_weight"] -= 0.025
 
             # Bound
             current_df["a1_weight"] = np.clip(current_df["a1_weight"], 0.01, 0.99)
@@ -102,9 +106,10 @@ def analysis(global_df, regional_df, product_df, product_name):
 
             current_df["cu_utility"] = new_cu
             current_df["al_utility"] = new_al
+            current_df["num_callibrations"] = iter_num
+            current_df["tau_value"] = current_tau
 
-        return current_tau
-
+        return current_df
     # def tau_callibrate_step(df, max_iter=50):
     #     current_df = df.copy()
     #     current_tau = tau_callibrate(current_df)
@@ -193,7 +198,9 @@ def analysis(global_df, regional_df, product_df, product_name):
         if total == 0:
             return np.nan
 
-        return exp_cu / total
+        result = exp_cu/total
+        result = np.clip(result, 10**(-9),10**(9))
+        return result
 
     # COLLECT DATA FOR EACH REGION
 
@@ -282,7 +289,7 @@ def analysis(global_df, regional_df, product_df, product_name):
         max_val = max(max(new_df[f"cu_a{att_num}_val"]),max(new_df[f"al_a{att_num}_val"]),max_val)
         min_val = min(min(new_df[f"cu_a{att_num}_val"]),min(new_df[f"al_a{att_num}_val"]), min_val)
         difference = abs(max_val - min_val)
-        print(max_val, min_val)
+        # print(max_val, min_val)
         if difference == 0:
             difference = 1e-9
         if att_direction == "positive":
@@ -315,17 +322,22 @@ def analysis(global_df, regional_df, product_df, product_name):
         for i in range(1,6):
             addition = new_df[f"{m}_a{i}_callibrated"]*new_df[f"a{i}_weight"]
             new_df[f"{m}_utility"] += addition
-            print(f"addition is {addition}")
-            print(f"utility is { new_df[f"{m}_utility"]}")
+            # print(f"addition is {addition}")
+            # print(f"utility is { new_df[f"{m}_utility"]}")
     new_df["cu_other_utility"] = new_df["cu_utility"] - new_df["cu_a1_callibrated"] * new_df["a1_weight"]
     new_df["al_other_utility"] = new_df["al_utility"] - new_df["al_a1_callibrated"] * new_df["a1_weight"]
     # CALCULATE TAU VALUES
     new_df.to_csv("test_tau.csv")
-    print(new_df[["region","cu_market_share","al_market_share","cu_utility","al_utility"]])
+    # print(new_df[["region","cu_market_share","al_market_share","cu_utility","al_utility"]])
 
     # CALLIBRATE TAU VALUES
+    new_df["num_callibrations"] = None
+    new_df["tau_value"] = None
 
-    new_df["tau_value"] = new_df.apply(tau_callibrate_step, axis=1)
+    new_df = new_df.apply(tau_callibrate_step, axis=1)
+    print(new_df)
+    # new_df["tau_value"] = new_df["tau_tuple"].str[0]
+    # new_df["num_callibrations"] = new_df["tau_tuple"].str[1]
 
     new_df.to_csv("test_after_tau.csv")
     # GENERATE MARKET SHARES
@@ -369,12 +381,16 @@ def analysis(global_df, regional_df, product_df, product_name):
         x = np.array(x)
         y = np.array(y)
 
+        print(f"xvals {x}")
+        print(f"yvals {y}")
+
         mask = (x > 0) & (y > 0) & np.isfinite(x) & np.isfinite(y)
 
         x = x[mask]
         y = y[mask]
 
         if len(x) < 2:
+            print(x)
             return {"A_val": np.nan, "beta_val": np.nan}
 
         # log_x = np.log(x)
@@ -403,7 +419,10 @@ def analysis(global_df, regional_df, product_df, product_name):
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
         gen_graph(region, prices, ms_vals, "Copper Price")
+
         power_constants[region] = get_power_constants(prices, ms_vals)
+        print(prices)
+        print(f"{region} has power constants {power_constants[region]} for product {product_name}")
 
     # VARY ALUMINUM
     for index, row in new_df.iterrows():
@@ -423,8 +442,13 @@ def analysis(global_df, regional_df, product_df, product_name):
     for key, value in power_constants.items():
         A = value["A_val"]
         beta = value["beta_val"]
-        ratio_points = np.array(np.arange(0.1,2, 0.001))
-        market_shares = A * (ratio_points** beta)
+        ratio_points = np.array(np.arange(0.01,10, 0.1))
+        # market_shares = A * (ratio_points** beta)
+        log_market = np.log(A) + beta * np.log(ratio_points)
+        log_market = np.clip(log_market, -700, 700)
+        market_shares = np.exp(log_market)
+        market_shares = np.clip(market_shares,0,1)
         gen_graph(key, ratio_points, market_shares, "Ratio of Copper Price to Aluminum Price")
 
     ###########3TEST
+    return new_df[["num_callibrations","tau_value"]]

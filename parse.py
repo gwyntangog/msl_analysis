@@ -6,10 +6,10 @@ import pandas as pd
 from pipeline_iter8 import analysis
 
 all_pdfs = list(Path("iter8_pdfs").glob("*.pdf"))
-print(all_pdfs)
-for pdf_path in all_pdfs:
+# print(all_pdfs)
+for pdf_path in all_pdfs[:1]:
     variables = {}
-    print(pdf_path)
+    # print(pdf_path)
     with fitz.open(pdf_path) as doc:
         text = "\n".join(page.get_text() for page in doc)
 
@@ -32,21 +32,21 @@ for pdf_path in all_pdfs:
     global_data = variables.get("global_data")
     regional_data = variables.get("regional_data")
     product_data = variables.get("product_data")
-    print(type(global_data))
-    print(type(regional_data))
-    print(type(product_data))
-    print(product_data[0]["product"])
+    # print(type(global_data))
+    # print(type(regional_data))
+    # print(type(product_data))
+    # print(product_data[0]["product"])
     product_name = product_data[0]["product"]
 
 
     global_df = pd.DataFrame([global_data])
     regional_df = pd.DataFrame(regional_data)
     product_df = pd.DataFrame(product_data)
-    print(global_df)
+    # print(global_df)
 
 # from pipeline_iter8 import analysis
 
-    analysis(global_df, regional_df, product_df, product_name)
+    print(analysis(global_df, regional_df, product_df, product_name))
 
 # from pathlib import Path
 # import fitz
