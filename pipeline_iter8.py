@@ -32,8 +32,8 @@ def analysis(global_df, regional_df, product_df, product_name):
         utility_al = df["al_utility"]
         market_share_cu = df["cu_market_share"]
 
-        mc = min(max(market_share_cu, 1e-6), 1-1e-6)
-        tau = (utility_cu-utility_al)/(math.log(mc)-math.log(1-mc))
+        mc = min(max(market_share_cu, 10**(-20)), 1-10**(-20))
+        tau = (utility_cu-utility_al)/(np.log(mc)-np.log(1-mc))
         return tau
 
     ######## tau_callibrate_step
@@ -43,27 +43,9 @@ def analysis(global_df, regional_df, product_df, product_name):
         for iter_num in range(max_iter):
 
             current_tau = tau_callibrate(current_df)
-            #assert(ms_logit(current_df["cu_utility"],current_df["al_utility"],current_tau)==current_df["cu_market_share"])
-            # assert np.isclose(
-            #     ms_logit(current_df["cu_utility"],
-            #             current_df["al_utility"],
-            #             current_tau),
-            #     current_df["cu_market_share"],
-            #     rtol=1e-9,
-            #     atol=1e-12
-            # )
-            # pred = ms_logit(current_df["cu_utility"],current_df["al_utility"],current_tau)
-            # if not np.isclose(pred, current_df["cu_market_share"], rtol=1e-9, atol=1e-12):
-            #     print("----------------")
-            #     print(current_df["region"], current_df["dominantmaterial"])
-            #     print("u_cu =", current_df["cu_utility"])
-            #     print("u_al =", current_df["al_utility"])
-            #     print("market =", current_df["cu_market_share"])
-            #     print("tau =", current_tau)
-            #     print("pred =", pred)
-            #     print("difference =", pred - current_df["cu_market_share"])
-            #     raise AssertionError
-            if current_tau > 0:
+            print(f"at {iter_num} with tau_val {current_tau}")
+            # if prev_tau is not None and abs(current_tau - prev_tau) < 1e-6:
+            if current_tau >= 0:
                 current_df["num_callibrations"] = iter_num
                 current_df["tau_value"] = current_tau
                 return current_df
@@ -90,13 +72,23 @@ def analysis(global_df, regional_df, product_df, product_name):
                 new_cu += current_df[f"a{i}_weight"] * current_df[f"cu_a{i}_val"]
                 new_al += current_df[f"a{i}_weight"] * current_df[f"al_a{i}_val"]
 
+            new_cu_other = 0
+            new_al_other = 0
+            for i in range(2,6):
+                new_cu += current_df[f"a{i}_weight"] * current_df[f"cu_a{i}_val"]
+                new_al += current_df[f"a{i}_weight"] * current_df[f"al_a{i}_val"]
+
             current_df["cu_utility"] = new_cu
             current_df["al_utility"] = new_al
+            current_df["cu_other_utility"] = new_cu_other
+            current_df["al_other_utility"] = new_al_other
+            # RECALCULATE CU_OTHER UTILITIES
             current_df["num_callibrations"] = iter_num
             current_df["tau_value"] = current_tau
 
         return current_df
 
+    ###### LOGIT HELPER
     def ms_logit(u_cu, u_al, tau):
         if tau <= 0 or not np.isfinite(tau):
             return np.nan
@@ -115,7 +107,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             return np.nan
 
         result = exp_cu/total
-        result = np.clip(result, 10**(-9),10**(9))
+        result = np.clip(result, 10**(-9),1-10**(-9))
         return result
 
     # COLLECT DATA FOR EACH REGION
@@ -261,7 +253,10 @@ def analysis(global_df, regional_df, product_df, product_name):
         elif product == "al":
             product_cost = calc_product_cost(df, cu_cost, al_cost, "al")
         callibrated_product_cost = callibrate_product_cost(df, product_cost)
-        utility = df["cu_other_utility"] + callibrated_product_cost * df["a1_weight"]
+        if product == "cu":
+            utility = df["cu_other_utility"] + callibrated_product_cost * df["a1_weight"]
+        elif product == "al":
+            utility = df["al_other_utility"] + callibrated_product_cost * df["a1_weight"]
         return utility
 
     def gen_graph(region, prices, ms_vals, xlabel = ""):
@@ -300,8 +295,8 @@ def analysis(global_df, regional_df, product_df, product_name):
         beta = beta/np.log(base_ratio)
         A = np.exp(ln_A)
         results = {"A_val": A, "beta_val": beta}
-        print("A,beta,base_ratio")
-        print(A, beta, base_ratio)
+        # print("A,beta,base_ratio")
+        # print(A, beta, base_ratio)
         return results
 
 
@@ -319,6 +314,7 @@ def analysis(global_df, regional_df, product_df, product_name):
             tau = row["tau_value"]
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
+        # print(f"ms_vals are {ms_vals}")
         gen_graph(region, prices, ms_vals, "Copper Price")
 
     # VARY THE RATIO
@@ -341,22 +337,24 @@ def analysis(global_df, regional_df, product_df, product_name):
             tau = row["tau_value"]
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
+        # print(f"ms_vals are {ms_vals}")
         gen_graph(region, prices, ms_vals, "Aluminum Price")
 
     # VARY RATIO
     for index, row in new_df.iterrows():
         region = row["region"]
         ms_vals = []
-        al_price = 2 # default
+        al_price = 2.5 # default
         ratios = np.arange(2,6, 0.1)
         cu_prices = al_price* ratios
         # prices = range(1,150) #TODO Aluminum range
         for cu_price in cu_prices:
-            utility_cu = calc_utility(row, cu_cost, al_cost, "cu")
-            utility_al = calc_utility(row, cu_cost, al_cost, "al")
+            utility_cu = calc_utility(row, cu_price, al_price, "cu")
+            utility_al = calc_utility(row, cu_price, al_price, "al")
             tau = row["tau_value"]
             ms = ms_logit(utility_cu, utility_al, tau)
             ms_vals.append(ms)
+        # print(f"ms_vals are {ms_vals}")
         gen_graph(region, ratios, ms_vals, "Ratio of Copper Price to Aluminum Price")
 
     # delta_u = np.linspace(-5, 5, 500)
@@ -382,4 +380,4 @@ def analysis(global_df, regional_df, product_df, product_name):
     #     gen_graph(key, ratio_points, market_shares, "Ratio of Copper Price to Aluminum Price")
 
     ###########3TEST
-    return new_df[["num_callibrations","tau_value"]]
+    return new_df[["cu_market_share", "al_market_share","cu_utility", "al_utility","num_callibrations","tau_value"]]

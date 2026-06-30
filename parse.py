@@ -39,5 +39,8 @@ for pdf_path in all_pdfs:
     regional_df = pd.DataFrame(regional_data)
     product_df = pd.DataFrame(product_data)
 
-    print(product_name)
-    print(analysis(global_df, regional_df, product_df, product_name))
+    for region in regional_df["region"].unique():
+        temp_region = regional_df[regional_df["region"] == region]
+        temp_product = product_df[product_df["region"] == region]
+        print(region, product_name)
+        print(analysis(global_df, temp_region, temp_product, product_name))
