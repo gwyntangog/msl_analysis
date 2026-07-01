@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import math
 import statsmodels.api as sm
 import os
+import re
+import ast
 
 # PHASE 1: Normal finding tau
 # PHASE 2: Tau callibrate step
@@ -86,3 +88,70 @@ def calc_product_cost(df, cu_material_cost =None, al_material_cost = None, curre
 
 test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+
+
+def parse_pdf(pdf_path):
+    """
+    Returns a dataframe that combines global df, regional df, product df
+    into one new dataframe.
+    """
+    variables = {}
+
+    with fitz.open(pdf_path) as doc:
+        text = "\n".join(page.get_text() for page in doc)
+
+    for name in ["global_data", "regional_data", "product_data"]:
+        match = re.search(
+            rf'{name}\s*=\s*(\{{.*?\}}|\[.*?\])',
+            text,
+            flags=re.DOTALL,
+        )
+        if match is None:
+            match = re.search(
+            rf'"{name}"\s*:\s*(\{{.*?\}}|\[.*?\])',
+            text,
+            flags=re.DOTALL,
+        )
+        if match:
+            variables[name] = ast.literal_eval(match.group(1))
+
+
+    global_data = variables.get("global_data")
+    regional_data = variables.get("regional_data")
+    product_data = variables.get("product_data")
+
+
+    global_df = pd.DataFrame([global_data])
+    regional_df = pd.DataFrame(regional_data)
+    product_df = pd.DataFrame(product_data)
+
+    copper_df = product_df[product_df["dominant material"] == "cu"]
+    copper_df = copper_df.add_prefix('cu_')
+    copper_df.rename(columns={'cu_region': 'region'}, inplace=True)
+
+    aluminum_df = product_df[product_df["dominant material"] == "al"]
+    aluminum_df = aluminum_df.add_prefix('al_')
+    aluminum_df.rename(columns={'al_region': 'region'}, inplace=True)
+
+
+    num_rows = regional_df.shape[0]
+    global_df = global_df.loc[global_df.index.repeat(num_rows)].reset_index(drop=True)
+    product_df = pd.merge(copper_df, aluminum_df, on='region')
+    merged_df = pd.merge(regional_df, product_df, on='region')
+    result = pd.concat([merged_df,global_df], axis = 1)
+
+    # print(result.columns)
+
+    return result
+
+
+
+print(parse_pdf("Final Product Variables.pdf"))
+
+# global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
+# global_data = global_data.loc[global_data.index.repeat(8)].reset_index(drop=True)
+# merged_df = pd.merge(regional_data, product_data, on='region')
+# result = pd.concat([merged_df,global_data], axis = 1)
+# print(merged_df)
+# print(result)
+########## DATA STRUCTURE NOTES
