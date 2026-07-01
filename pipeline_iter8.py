@@ -119,15 +119,11 @@ def analysis(global_df, regional_df, product_df, product_name):
 
     for region in regions_list:
         current_region = regional_df[regional_df["region"] == region]
-
-        cu_price = current_region["copper_price_per_kg"].iloc[0]
-        al_price = current_region["aluminum_price_per_kg"].iloc[0]
-
         region_result = {}
 
         region_result["region"] = region
-        region_result["cu_material_cost"] = cu_price
-        region_result["al_material_cost"] = al_price
+        region_result["cu_material_cost"] = current_region["copper_price_per_kg"].iloc[0]
+        region_result["al_material_cost"] = current_region["aluminum_price_per_kg"].iloc[0]
         region_result["cu_market_share"] = current_region["copper_product_market_share"].iloc[0]
         region_result["al_market_share"] = current_region["aluminum_product_market_share"].iloc[0]
 
