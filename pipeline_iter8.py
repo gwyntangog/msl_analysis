@@ -75,8 +75,8 @@ def analysis(global_df, regional_df, product_df, product_name):
             new_cu_other = 0
             new_al_other = 0
             for i in range(2,6):
-                new_cu += current_df[f"a{i}_weight"] * current_df[f"cu_a{i}_val"]
-                new_al += current_df[f"a{i}_weight"] * current_df[f"al_a{i}_val"]
+                new_cu_other += current_df[f"a{i}_weight"] * current_df[f"cu_a{i}_val"]
+                new_al_other += current_df[f"a{i}_weight"] * current_df[f"al_a{i}_val"]
 
             current_df["cu_utility"] = new_cu
             current_df["al_utility"] = new_al
@@ -267,16 +267,16 @@ def analysis(global_df, regional_df, product_df, product_name):
 
         # add light markers (helps see actual sampled points)
         plt.scatter(prices[::5], ms_vals[::5], s=18, color="black", alpha=0.6, label="Sample points")
-        # if x_special and y_special:
-        #     plt.scatter(
-        #         x_special,
-        #         y_special,
-        #         color="red",
-        #         s=100,           # marker size
-        #         marker="o",      # circle
-        #         zorder=5,        # draw on top of the line
-        #         label="Observed point"
-        #     )
+        if x_special and y_special:
+            plt.scatter(
+                x_special,
+                y_special,
+                color="red",
+                s=100,           # marker size
+                marker="o",      # circle
+                zorder=5,        # draw on top of the line
+                label="Observed point"
+            )
 
         # axes limits
         plt.ylim(-0.05, 1.05)
