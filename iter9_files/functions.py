@@ -91,6 +91,7 @@ test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_
 
 
 def parse_pdf(pdf_path):
+
     """
     Returns a dataframe that combines global df, regional df, product df
     into one new dataframe.
@@ -144,6 +145,20 @@ def parse_pdf(pdf_path):
 
     return result
 
+def create_dataframe():
+    return
+
+def apply_rowwise_changes():
+    return
+
+def calculate_product_costs():
+    return
+
+def get_true_mins_maxes():
+    return
+
+def normalize_attributes():
+    return
 
 
 print(parse_pdf("Final Product Variables.pdf"))
