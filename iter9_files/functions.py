@@ -67,7 +67,29 @@ def make_data_dict(global_df, regional_df, product_df, region, product):
         result[f"a{i}_max"]
 
 
-def calc_product_cost(row, cu_material_cost =None, al_material_cost = None, current_product = "cu"):
+# def calc_product_cost(row, cu_material_cost =None, al_material_cost = None, current_product = "cu"):
+#     """
+#     Expects df to have these columns
+#         cu/al_nonmaterial
+#         cu/al_copper_kg
+#         cu/al_aluminum_kg
+#         cu/al_material_cost
+#     Assumes that there is only one row... hm... maybe make a dictionary instead...
+#     """
+#     nonmaterial = row[f"{current_product}_nonmaterial"]
+#     copper_kg = row[f"{current_product}_copper_kg"]
+#     aluminum_kg = row[f"{current_product}_aluminum_kg"]
+#     if cu_material_cost == None:
+#         cu_material_cost = row["cu_material_cost"]
+#     if al_material_cost == None:
+#         al_material_cost = row["al_material_cost"]
+#     product_cost = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
+#     return product_cost
+
+# test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
+#              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+
+def calc_product_cost(input_df, cu_material_cost =None, al_material_cost = None, products = ["cu","al"]):
     """
     Expects df to have these columns
         cu/al_nonmaterial
@@ -76,18 +98,22 @@ def calc_product_cost(row, cu_material_cost =None, al_material_cost = None, curr
         cu/al_material_cost
     Assumes that there is only one row... hm... maybe make a dictionary instead...
     """
-    nonmaterial = row[f"{current_product}_nonmaterial"]
-    copper_kg = row[f"{current_product}_copper_kg"]
-    aluminum_kg = row[f"{current_product}_aluminum_kg"]
-    if cu_material_cost == None:
-        cu_material_cost = row["cu_material_cost"]
-    if al_material_cost == None:
-        al_material_cost = row["al_material_cost"]
-    product_cost = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
-    return product_cost
+    df = input_df.copy()
+    for m in products:
+        nonmaterial = df[f"{m}_non_material_cost_per_unit"]
+        copper_kg = df[f"{m}_copper_kg"]
+        aluminum_kg = df[f"{m}_aluminum_kg"]
+        if cu_material_cost is None:
+            cu_material_cost = df["copper_price_per_kg"]
+        if al_material_cost is None:
+            al_material_cost = df["aluminum_price_per_kg"]
+        df[f"{m}_attribute_1_value"] = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
+    return df
 
 test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+
+
 
 
 def parse_pdf(pdf_path):
@@ -172,12 +198,27 @@ def get_true_mins_maxes(df_input, num_attributes = 5):
             df[f"attribute_{i}_min"] = min_observed
     return df
 
-def normalize_attributes():
-    return
+def normalize_attributes(input_df, num_attributes = 5):
+    """
+    Applied to entire dataframe. Assumes that all values are within range of min max.
+    """
+    df = input_df.copy()
+    for i in range(1, num_attributes + 1):
+        direction = df[f"direction_attribute_{i}"]
+        if (direction == "positive").all():
+            for m in ["cu","al"]:
+                df[f"{m}_a{i}_callibrated"] = (df[f"{m}_attribute_{i}_value"]- df[f"attribute_{i}_min"])/(df[f"attribute_{i}_max"]-df[f"attribute_{i}_min"])
+        elif (direction == "negative").all():
+            for m in ["cu","al"]:
+                df[f"{m}_a{i}_callibrated"] = ( df[f"attribute_{i}_max"]-df[f"{m}_attribute_{i}_value"])/(df[f"attribute_{i}_max"]-df[f"attribute_{i}_min"])
+    return df
 
 
-# result = parse_pdf("Final Product Variables.pdf")
-# print(result.columns)
+result = parse_pdf("Final Product Variables.pdf")
+result = calc_product_cost(result)
+result = get_true_mins_maxes(result)
+result = normalize_attributes(result)
+print(result)
 # print(get_true_mins_maxes(test2_df,1))
 
 # global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
