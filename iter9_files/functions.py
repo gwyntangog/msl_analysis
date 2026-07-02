@@ -151,17 +151,34 @@ def create_dataframe():
 def apply_rowwise_changes():
     return
 
-def calculate_product_costs():
-    return
+test2_df = pd.DataFrame([{'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':1,
+       'attribute_1_max':4, 'attribute_2_min':0, 'attribute_2_max':10}])
 
-def get_true_mins_maxes():
-    return
+def get_true_mins_maxes(df_input, num_attributes = 5):
+    """
+    This function is applied to the whole dataframe and returns a whole
+    new dataframe.
+    assume attrbute values for all attributes from 1 to 5.
+    assume attribute mins and maxes.
+    """
+    df = df_input.copy()
+    for i in range(1,num_attributes + 1):
+        max_observed = max(df[f"cu_attribute_{i}_value"].max(), df[f"al_attribute_{i}_value"].max(), df[f"attribute_{i}_max"].max())
+        min_observed = min(df[f"cu_attribute_{i}_value"].min(), df[f"al_attribute_{i}_value"].min(), df[f"attribute_{i}_min"].min())
+        if max_observed > df[f"attribute_{i}_max"].max():
+            df[f"attribute_{i}_max"] = max_observed
+        if min_observed < df[f"attribute_{i}_min"].min():
+            df[f"attribute_{i}_min"] = min_observed
+    return df
 
 def normalize_attributes():
     return
 
 
-print(parse_pdf("Final Product Variables.pdf"))
+# result = parse_pdf("Final Product Variables.pdf")
+# print(result.columns)
+# print(get_true_mins_maxes(test2_df,1))
 
 # global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
 # global_data = global_data.loc[global_data.index.repeat(8)].reset_index(drop=True)

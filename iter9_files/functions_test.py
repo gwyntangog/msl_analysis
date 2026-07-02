@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 from functions import tau_callibrate, ms_logit, unzero
-from functions import calc_product_cost
+from functions import calc_product_cost, get_true_mins_maxes
 
 class testUnzero(unittest.TestCase):
     """Partitions
@@ -96,6 +96,22 @@ class testProductCalc(unittest.TestCase):
         expected_pc2 = 341
         self.assertEqual(pc1, expected_pc1)
         self.assertEqual(pc2, expected_pc2)
+
+#######
+class testMinsMaxes(unittest.TestCase):
+    """
+    """
+    test_df = pd.DataFrame([{'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':1,
+       'attribute_1_max':4, 'attribute_2_min':0, 'attribute_2_max':10}])
+    expected_df = pd.DataFrame([{'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10}])
+    num_test_atts = 2
+    def test_min_maxes(self):
+        result = get_true_mins_maxes(self.test_df,self.num_test_atts)
+        print(result)
+        pd.testing.assert_frame_equal(result, self.expected_df)
 
 if __name__ == '__main__':
     unittest.main()
