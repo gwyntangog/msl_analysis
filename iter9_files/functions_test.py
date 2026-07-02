@@ -142,6 +142,35 @@ class testNormalizeAttributes(unittest.TestCase):
 
 ####
 
+class testTauFunctions(unittest.TestCase):
+    """
+    """
+    def test_tau_callibrate1(self):
+        utility_cu = 0.2
+        utility_al = 0.8
+        market_share_cu = 0.2
+        expected_tau = 0.432809
+        tau = tau_callibrate(utility_cu,utility_al,market_share_cu)
+        tau = round(tau,6)
+        self.assertEqual(tau, expected_tau)
+    def test_tau_callibrate2(self):
+        utility_cu = 0.7
+        utility_al = 0.7
+        market_share_cu = 0.5
+        expected_tau = np.inf
+        tau = tau_callibrate(utility_cu,utility_al,market_share_cu)
+        self.assertEqual(tau, expected_tau)
+    def test_tau_callibrate3(self):
+        utility_cu = 0.7
+        utility_al = 0.5
+        market_share_cu = 0.3
+        expected_tau = -0.236045
+        tau = tau_callibrate(utility_cu,utility_al,market_share_cu)
+        tau = round(tau,6)
+        self.assertEqual(tau, expected_tau)
+    #############TEST AS ROW
+    #############TEST AS DF
+
 
 if __name__ == '__main__':
     unittest.main()
