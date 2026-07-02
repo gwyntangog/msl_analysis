@@ -66,29 +66,6 @@ def make_data_dict(global_df, regional_df, product_df, region, product):
         result[f"a{i}_min"]
         result[f"a{i}_max"]
 
-
-# def calc_product_cost(row, cu_material_cost =None, al_material_cost = None, current_product = "cu"):
-#     """
-#     Expects df to have these columns
-#         cu/al_nonmaterial
-#         cu/al_copper_kg
-#         cu/al_aluminum_kg
-#         cu/al_material_cost
-#     Assumes that there is only one row... hm... maybe make a dictionary instead...
-#     """
-#     nonmaterial = row[f"{current_product}_nonmaterial"]
-#     copper_kg = row[f"{current_product}_copper_kg"]
-#     aluminum_kg = row[f"{current_product}_aluminum_kg"]
-#     if cu_material_cost == None:
-#         cu_material_cost = row["cu_material_cost"]
-#     if al_material_cost == None:
-#         al_material_cost = row["al_material_cost"]
-#     product_cost = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
-#     return product_cost
-
-# test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
-#              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
-
 def calc_product_cost(input_df, cu_material_cost =None, al_material_cost = None, products = ["cu","al"]):
     """
     Expects df to have these columns
@@ -171,11 +148,6 @@ def parse_pdf(pdf_path):
 
     return result
 
-def create_dataframe():
-    return
-
-def apply_rowwise_changes():
-    return
 
 test2_df = pd.DataFrame([{'cu_attribute_1_value':5,'cu_attribute_2_value':5,
        'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':1,

@@ -76,27 +76,14 @@ class testLogitFunctions(unittest.TestCase):
 class testProductCalc(unittest.TestCase):
     """
     """
-    test_df1 = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
-             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+    test_df1 = pd.DataFrame([{"cu_non_material_cost_per_unit": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "copper_price_per_kg": 7,
+             "al_non_material_cost_per_unit": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "aluminum_price_per_kg": 3}])
+    expected1 = pd.DataFrame([{"cu_non_material_cost_per_unit": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "copper_price_per_kg": 7,
+             "al_non_material_cost_per_unit": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "aluminum_price_per_kg": 3,
+             "cu_attribute_1_value":541, "al_attribute_1_value":573}])
     def test_prod_calc1(self):
-        new_result = self.test_df1.copy()
-        new_result["pc"] = calc_product_cost(self.test_df1)
-        pc = new_result["pc"][0]
-        expected_pc = 541
-        self.assertEqual(pc, expected_pc)
-    test_df2 = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
-             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3},{"cu_nonmaterial": 300, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
-             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
-    def test_prod_calc2(self):
-        new_result = self.test_df2.copy()
-        new_result["pc"] = self.test_df2.apply(calc_product_cost,axis = 1)
-        pc1 = new_result["pc"][0]
-        pc2 = new_result["pc"][1]
-        expected_pc1 = 541
-        expected_pc2 = 341
-        self.assertEqual(pc1, expected_pc1)
-        self.assertEqual(pc2, expected_pc2)
-
+        new_result= calc_product_cost(self.test_df1)
+        pd.testing.assert_frame_equal(new_result, self.expected1)
 #######
 class testMinsMaxes(unittest.TestCase):
     """
@@ -112,6 +99,8 @@ class testMinsMaxes(unittest.TestCase):
         result = get_true_mins_maxes(self.test_df,self.num_test_atts)
         print(result)
         pd.testing.assert_frame_equal(result, self.expected_df)
+
+####
 
 if __name__ == '__main__':
     unittest.main()
