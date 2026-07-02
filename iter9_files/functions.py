@@ -67,7 +67,7 @@ def make_data_dict(global_df, regional_df, product_df, region, product):
         result[f"a{i}_max"]
 
 
-def calc_product_cost(df, cu_material_cost =None, al_material_cost = None, current_product = "cu"):
+def calc_product_cost(row, cu_material_cost =None, al_material_cost = None, current_product = "cu"):
     """
     Expects df to have these columns
         cu/al_nonmaterial
@@ -76,15 +76,15 @@ def calc_product_cost(df, cu_material_cost =None, al_material_cost = None, curre
         cu/al_material_cost
     Assumes that there is only one row... hm... maybe make a dictionary instead...
     """
-    nonmaterial = df[f"{current_product}_nonmaterial"].iloc[0]
-    copper_kg = df[f"{current_product}_copper_kg"].iloc[0]
-    aluminum_kg = df[f"{current_product}_aluminum_kg"].iloc[0]
+    nonmaterial = row[f"{current_product}_nonmaterial"]
+    copper_kg = row[f"{current_product}_copper_kg"]
+    aluminum_kg = row[f"{current_product}_aluminum_kg"]
     if cu_material_cost == None:
-        cu_material_cost = df["cu_material_cost"].iloc[0]
+        cu_material_cost = row["cu_material_cost"]
     if al_material_cost == None:
-        al_material_cost = df["al_material_cost"].iloc[0]
+        al_material_cost = row["al_material_cost"]
     product_cost = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
-    return product_cost[0]
+    return product_cost
 
 test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])

@@ -73,34 +73,29 @@ class testLogitFunctions(unittest.TestCase):
 ############
 
 
-# class testProductCalc(unittest.TestCase):
-#     """
-#     """
-#     test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
-#              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
-#     def test_prod_calc1(self):
-#         pc = calc_product_cost(self.test_df)
-#         print(pc)
-#         expected_pc = 541
-#         self.assertEqual(pc, expected_pc)
-    # def test_logit2(self):
-    #     utility_cu = 0.5
-    #     utility_al = 0.5
-    #     tau = 1
-    #     ms = ms_logit(utility_cu,utility_al,tau)
-    #     expected_ms = 0.5
-    #     self.assertEqual(ms, expected_ms)
-    # def test_logit3(self):
-    #     utility_cu = 0.2
-    #     utility_al = 0.8
-    #     tau = 2
-    #     ms = ms_logit(utility_cu,utility_al,tau)
-    #     ms = round(ms,6)
-    #     expected_ms = 0.425557
-    #     self.assertEqual(ms, expected_ms)
+class testProductCalc(unittest.TestCase):
+    """
+    """
+    test_df1 = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
+             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+    def test_prod_calc1(self):
+        new_result = self.test_df1.copy()
+        new_result["pc"] = calc_product_cost(self.test_df1)
+        pc = new_result["pc"][0]
+        expected_pc = 541
+        self.assertEqual(pc, expected_pc)
+    test_df2 = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
+             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3},{"cu_nonmaterial": 300, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
+             "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
+    def test_prod_calc2(self):
+        new_result = self.test_df2.copy()
+        new_result["pc"] = self.test_df2.apply(calc_product_cost,axis = 1)
+        pc1 = new_result["pc"][0]
+        pc2 = new_result["pc"][1]
+        expected_pc1 = 541
+        expected_pc2 = 341
+        self.assertEqual(pc1, expected_pc1)
+        self.assertEqual(pc2, expected_pc2)
 
-
-# def tau_callibrate():
-#     return
 if __name__ == '__main__':
     unittest.main()
