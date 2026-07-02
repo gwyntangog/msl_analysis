@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 from functions import tau_callibrate, ms_logit, unzero
-from functions import calc_product_cost, get_true_mins_maxes
+from functions import calc_product_cost, get_true_mins_maxes, normalize_attributes, calc_utilities
 
 class testUnzero(unittest.TestCase):
     """Partitions
@@ -70,7 +70,7 @@ class testLogitFunctions(unittest.TestCase):
         expected_ms = 0.425557
         self.assertEqual(ms, expected_ms)
 
-############
+##########################################################################################################
 
 
 class testProductCalc(unittest.TestCase):
@@ -100,7 +100,48 @@ class testMinsMaxes(unittest.TestCase):
         print(result)
         pd.testing.assert_frame_equal(result, self.expected_df)
 
+##########
+
+class testNormalizeAttributes(unittest.TestCase):
+    """
+    """
+    test_df = pd.DataFrame([{'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                             'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10}])
+    expected_df = pd.DataFrame([{'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                                 'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10,
+       "cu_a1_callibrated":1.0, "al_a1_callibrated":0.0,"cu_a2_callibrated":0.5, "al_a2_callibrated":1.0}])
+    num_test_atts = 2
+    def test_normalize(self):
+        result = normalize_attributes(self.test_df,self.num_test_atts)
+        print(result)
+        pd.testing.assert_frame_equal(result, self.expected_df)
+
+class testNormalizeAttributes(unittest.TestCase):
+    """
+    """
+    test_df = pd.DataFrame([{"weight_attribute_1": 0.3, "weight_attribute_2":0.7,'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                                 'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10,
+       "cu_a1_callibrated":1.0, "al_a1_callibrated":0.0,"cu_a2_callibrated":0.5, "al_a2_callibrated":1.0}])
+    expected_df = pd.DataFrame([{"weight_attribute_1": 0.3, "weight_attribute_2":0.7,'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                                 'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10,
+       "cu_a1_callibrated":1.0, "al_a1_callibrated":0.0,"cu_a2_callibrated":0.5, "al_a2_callibrated":1.0,
+       "cu_utility":0.65,"al_utility":0.7}])
+    num_test_atts = 2
+    def test_normalize(self):
+        result = calc_utilities(self.test_df,self.num_test_atts)
+        print(result)
+        pd.testing.assert_frame_equal(result, self.expected_df)
+
 ####
+
 
 if __name__ == '__main__':
     unittest.main()

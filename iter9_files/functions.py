@@ -45,6 +45,7 @@ def ms_logit(utility_cu, utility_al, tau):
     return result
 
 
+###### ALL FUNCTIONS BELOW ARE APPLIED TO THE WHOLE DF AND HAVE BEEN TESTED
 def make_data_dict(global_df, regional_df, product_df, region, product):
     """
     Assume that you are given global, regional, and product dataframes.
@@ -89,9 +90,6 @@ def calc_product_cost(input_df, cu_material_cost =None, al_material_cost = None,
 
 test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
-
-
-
 
 def parse_pdf(pdf_path):
 
@@ -148,7 +146,6 @@ def parse_pdf(pdf_path):
 
     return result
 
-
 test2_df = pd.DataFrame([{'cu_attribute_1_value':5,'cu_attribute_2_value':5,
        'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':1,
        'attribute_1_max':4, 'attribute_2_min':0, 'attribute_2_max':10}])
@@ -185,12 +182,46 @@ def normalize_attributes(input_df, num_attributes = 5):
                 df[f"{m}_a{i}_callibrated"] = ( df[f"attribute_{i}_max"]-df[f"{m}_attribute_{i}_value"])/(df[f"attribute_{i}_max"]-df[f"attribute_{i}_min"])
     return df
 
+def calc_utilities(input_df, num_attributes = 5):
+    df = input_df.copy()
+    for m in ["cu","al"]:
+        df[f"{m}_utility"] = 0
+        for i in range(1,num_attributes + 1):
+            df[f"{m}_utility"] += (df[f"{m}_a{i}_callibrated"] * df[f"weight_attribute_{i}"])
+    return df
+
+def tau_callibrate(utility_cu, utility_al, market_share_cu):
+    """
+    Callibrate the value of tau such that the logit function returns the same value
+    as the current MARKET_SHARE_CU. See derivation in Overleaf file.
+    Calculates tau based on copper utility, al utility, and market share.
+    """
+    mc = np.clip(market_share_cu, 10**(-9), 1-10**(-9))
+    if mc == 0.5:
+        return np.inf
+    else:
+        tau = (utility_cu-utility_al)/(np.log(mc)-np.log(1-mc))
+        return tau
+
+def tau_callibrate_row(row):
+    """
+    callibrate tau per row
+    """
+    return tau_callibrate(row["cu_utility"], row["al_utility"],row["copper_product_market_share"])
+
+def tau_callibrate_df(input_df):
+    df = input_df.copy()
+    df["tau_value"] = df.apply(tau_callibrate_row, axis = 1)
+    return df
+####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
 result = calc_product_cost(result)
 result = get_true_mins_maxes(result)
 result = normalize_attributes(result)
-print(result)
+result = calc_utilities(result)
+result = tau_callibrate_df(result)
+print(result.columns)
 # print(get_true_mins_maxes(test2_df,1))
 
 # global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
