@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
-from functions import tau_callibrate, ms_logit, unzero
+from functions import tau_callibrate, tau_callibrate_row, tau_callibrate_df, ms_logit, unzero
 from functions import calc_product_cost, get_true_mins_maxes, normalize_attributes, calc_utilities
 
 class testUnzero(unittest.TestCase):
@@ -168,6 +168,19 @@ class testTauFunctions(unittest.TestCase):
         tau = tau_callibrate(utility_cu,utility_al,market_share_cu)
         tau = round(tau,6)
         self.assertEqual(tau, expected_tau)
+    def test_tau_row(self):
+        row = pd.DataFrame([{"cu_utility":0.7, "al_utility": 0.5, "copper_product_market_share": 0.3}]).iloc[0]
+        expected = -0.236045
+        result = round(tau_callibrate_row(row),6)
+        self.assertEqual(result, expected)
+    def test_tau_df(self):
+        df = pd.DataFrame([{"cu_utility":0.7, "al_utility": 0.5, "copper_product_market_share": 0.3}])
+        expected = -0.236045
+        new_df = tau_callibrate_df(df)
+        result = new_df["tau_value"].iloc[0]
+        result = round(result,6)
+        self.assertEqual(result, expected)
+
     #############TEST AS ROW
     #############TEST AS DF
 
