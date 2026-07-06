@@ -214,21 +214,41 @@ def tau_callibrate_df(input_df):
     df["tau_value"] = df.apply(tau_callibrate_row, axis = 1)
     return df
 
-def normalize_price_row(row, price):
-    max_price = row[f"attribute_1_max"]
-    min_price = row[f"attribute_1_min"]
-    result = (max_price - price)/(max_price - min_price)
+#################################
+def calc_product_cost_row(row, cu_material_cost = None, al_material_cost = None, variable = "cu"):
+    nonmaterial = row[f"{variable}_non_material_cost_per_unit"]
+    copper_kg = row[f"{variable}_copper_kg"]
+    aluminum_kg = row[f"{variable}_aluminum_kg"]
+    if cu_material_cost is None:
+        cu_material_cost = row["copper_price_per_kg"]
+    if al_material_cost is None:
+        al_material_cost = row["aluminum_price_per_kg"]
+    result = nonmaterial + copper_kg * cu_material_cost + al_material_cost * aluminum_kg
     return result
 
-def calc_utility_row(row, price = None, variable = "cu", num_attributes = 5):
-    if price == None:
-        price = row[f"{variable}_a1_callibrated"]
-    else:
-        price = normalize_price_row(row, price)
-    result = price * row["weight_attribute_1"]
-    for i in range(2,num_attributes + 1):
-            result += (row[f"{variable}_a{i}_callibrated"] * row[f"weight_attribute_{i}"])
+def normalize_product_cost_row(row, product_cost):
+    max_product_cost = row[f"attribute_1_max"]
+    min_product_cost = row[f"attribute_1_min"]
+    result = (max_product_cost - product_cost)/(max_product_cost - min_product_cost)
     return result
+
+def calc_utility_row(row, cu_material_cost = None, al_material_cost = None, variable = "cu", num_attributes = 5):
+    # Get copper
+    cu_product_cost = calc_product_cost_row(row, cu_material_cost =cu_material_cost, al_material_cost=al_material_cost, variable = "cu")
+    cu_product_cost = normalize_product_cost_row(row, cu_product_cost)
+    cu_utility = cu_product_cost * row["weight_attribute_1"]
+    for i in range(2,num_attributes + 1):
+        cu_utility += (row[f"cu_a{i}_callibrated"] * row[f"weight_attribute_{i}"])
+    # Get aluminum
+    al_product_cost = calc_product_cost_row(row, cu_material_cost =cu_material_cost, al_material_cost=al_material_cost, variable = "al")
+    al_product_cost = normalize_product_cost_row(row, al_product_cost)
+    al_utility = al_product_cost * row["weight_attribute_1"]
+    for i in range(2,num_attributes + 1):
+        al_utility += (row[f"al_a{i}_callibrated"] * row[f"weight_attribute_{i}"])
+    if variable == "cu":
+        return cu_utility
+    elif variable == "al":
+        return al_utility
 
 def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01), variable="cu", num_attributes = 5):
     """
@@ -238,53 +258,105 @@ def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01),
     region_row = input_df.loc[input_df["region"] == region].iloc[0]
     tau = region_row["tau_value"]
     if variable == "cu":
-        al_utility = region_row["al_utility"]
         for price in price_range:
-            cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
+            al_utility = calc_utility_row(region_row, cu_material_cost = price, num_attributes=num_attributes, variable = "al")
+            cu_utility = calc_utility_row(region_row,cu_material_cost = price, num_attributes = num_attributes, variable = "cu")
             ms = ms_logit(cu_utility, al_utility, tau)
             ms_points.append(ms)
     elif variable == "al":
-        cu_utility = region_row["cu_utility"]
         for price in price_range:
-            cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
+            al_utility = calc_utility_row(region_row, al_material_cost = price, num_attributes=num_attributes, variable = "al")
+            cu_utility = calc_utility_row(region_row, al_material_cost = price, num_attributes = num_attributes, variable = "cu")
             ms = ms_logit(cu_utility, al_utility, tau)
             ms_points.append(ms)
     else:
         raise ValueError("Invalid input")
     return ms_points
 
-def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
-    ms_points = []
-    region_row = input_df.loc[input_df["region"] == region].iloc[0]
-    tau = region_row["tau_value"]
-    if hold == "al":
-        al_utility = calc_utility_row(region_row, hold_value, "al", num_attributes=num_attributes)
-        for ratio in ratio_range:
-            price = ratio*hold_value
-            cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
-            ms = ms_logit(cu_utility, al_utility, tau)
-            ms_points.append(ms)
-    elif hold == "cu":
-        cu_utility = calc_utility_row(region_row, hold_value, "cu", num_attributes=num_attributes)
-        for ratio in ratio_range:
-            price = hold_value/ratio
-            cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
-            ms = ms_logit(cu_utility, al_utility, tau)
-            ms_points.append(ms)
-    else:
-        raise ValueError("Invalid input")
-    return ms_points
+# def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
+#     ms_points = []
+#     region_row = input_df.loc[input_df["region"] == region].iloc[0]
+#     tau = region_row["tau_value"]
+#     if hold == "al":
+#         al_utility = calc_utility_row(region_row, hold_value, "al", num_attributes=num_attributes)
+#         for ratio in ratio_range:
+#             price = ratio*hold_value
+#             cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
+#             ms = ms_logit(cu_utility, al_utility, tau)
+#             ms_points.append(ms)
+#     elif hold == "cu":
+#         cu_utility = calc_utility_row(region_row, hold_value, "cu", num_attributes=num_attributes)
+#         for ratio in ratio_range:
+#             price = hold_value/ratio
+#             cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
+#             ms = ms_logit(cu_utility, al_utility, tau)
+#             ms_points.append(ms)
+#     else:
+#         raise ValueError("Invalid input")
+#     return ms_points
 
+def generate_graph(df, region, x,y):
+    plt.figure(figsize=(7, 4.5))
+
+    # main line (model)
+    plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
+    # axes limits
+    plt.ylim(-0.05, 1.05)
+    plt.grid(True, linestyle="--", alpha=0.3)
+    region_row = df[df["region"] == region].iloc[0]
+    x_special = region_row["copper_price_per_kg"]
+    y_special = region_row["copper_product_market_share"]
+    plt.scatter(
+        x_special,
+        y_special,
+        color="red",
+        s=100,           # marker size
+        marker="o",      # circle
+        zorder=5,        # draw on top of the line
+        label="Observed point"
+    )
+    # plt.xlabel(xlabel, fontsize=11)
+    plt.ylabel("Copper Product Market Share", fontsize=11)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+    plt.clf()
 ####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
 result = calc_product_cost(result)
+# print(f"max is {result["attribute_1_max"]}")
+# print(f"min is {result["attribute_1_min"]}")
 result = get_true_mins_maxes(result)
+# print(f"max is {result["attribute_1_max"]}")
+# print(f"min is {result["attribute_1_min"]}")
 result = normalize_attributes(result)
 result = calc_utilities(result)
 result = tau_callibrate_df(result)
 print(result.columns)
-print(point_generation_price(result,"India"))
+print(result[result["region"] == "India"][["copper_product_market_share", "copper_price_per_kg"]])
+x = np.arange(0.1,20, 0.1)
+y = point_generation_price(result,"India", price_range = x)
+generate_graph(result, "India", x, y)
+current_row = result.loc[result["region"]== "India"].iloc[0]
+# print(y)
+
+# cu_utility = calc_utility_row(current_row, 10.1)
+# cu_utility2 = calc_utility_row(current_row)
+# al_utility = calc_utility_row(current_row, variable = "al")
+# normal1 = normalize_price_row(current_row, 10.1)
+# normal2 = current_row["cu_a1_callibrated"]
+# tau_val = current_row["tau_value"]
+# print(current_row["direction_attribute_1"])
+# print(f"max is {current_row["attribute_1_max"]}")
+# print(f"min is {current_row["attribute_1_min"]}")
+# print(f"normal_1 is {normal1}")
+# print(f"normal_2 is {normal2}")
+# print(f"cu_utility_1 is {cu_utility}")
+# print(f"cu_utility_2 is {cu_utility2}")
+# print(al_utility)
+# print(tau_val)
+# print(ms_logit(cu_utility, al_utility,tau_val))
 # print(get_true_mins_maxes(test2_df,1))
 
 # global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
