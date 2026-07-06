@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from functions import tau_callibrate, tau_callibrate_row, tau_callibrate_df, ms_logit, unzero
 from functions import calc_product_cost, get_true_mins_maxes, normalize_attributes, calc_utilities
-from functions import calc_utility_row, normalize_price_row, point_generation_price
+from functions import calc_utility_row, normalize_price_row, point_generation_price, point_generation_ratio
 
 class testUnzero(unittest.TestCase):
     """Partitions
@@ -224,6 +224,25 @@ class testPointGeneration(unittest.TestCase):
         expected = [0.88, 0.84]
         self.assertEqual(round(result[0],2), expected[0])
         self.assertEqual(round(result[1],2), expected[1])
+
+######################
+class testPointGenerationRatio(unittest.TestCase):
+    """
+    """
+    test_df = pd.DataFrame([{"region": "India","weight_attribute_1": 0.3, "weight_attribute_2":0.7,'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                                 'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10,
+       "cu_a1_callibrated":1.0, "al_a1_callibrated":0.0,"cu_a2_callibrated":0.5, "al_a2_callibrated":1.0, "al_utility":0.2, "tau_value":0.2}])
+    def test_point_generation_ratio(self):
+        result = point_generation_ratio(self.test_df, "India", ratio_range =[1,2], num_attributes = 2)
+        # al_price = 2
+        # al_utility = 0.6*0.3+ 1*0.7 = 0.88
+        # cu_prices = 2,4 (0.6, 0.2)
+        # cu_utility =0.6*0.3 + 0.5*0.7 = 0.53, 0.2*0.3 + 0.5*0.7 = 0.41
+        expected = [0.148, 0.087]
+        self.assertEqual(round(result[0],3), expected[0])
+        self.assertEqual(round(result[1],3), expected[1])
 
 if __name__ == '__main__':
     unittest.main()

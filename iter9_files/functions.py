@@ -253,6 +253,28 @@ def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01),
         raise ValueError("Invalid input")
     return ms_points
 
+def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
+    ms_points = []
+    region_row = input_df.loc[input_df["region"] == region].iloc[0]
+    tau = region_row["tau_value"]
+    if hold == "al":
+        al_utility = calc_utility_row(region_row, hold_value, "al", num_attributes=num_attributes)
+        for ratio in ratio_range:
+            price = ratio*hold_value
+            cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    elif hold == "cu":
+        cu_utility = calc_utility_row(region_row, hold_value, "cu", num_attributes=num_attributes)
+        for ratio in ratio_range:
+            price = hold_value/ratio
+            cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    else:
+        raise ValueError("Invalid input")
+    return ms_points
+
 ####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
