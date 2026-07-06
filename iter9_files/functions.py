@@ -213,6 +213,46 @@ def tau_callibrate_df(input_df):
     df = input_df.copy()
     df["tau_value"] = df.apply(tau_callibrate_row, axis = 1)
     return df
+
+def normalize_price_row(row, price):
+    max_price = row[f"attribute_1_max"]
+    min_price = row[f"attribute_1_min"]
+    result = (max_price - price)/(max_price - min_price)
+    return result
+
+def calc_utility_row(row, price = None, variable = "cu", num_attributes = 5):
+    if price == None:
+        price = row[f"{variable}_a1_callibrated"]
+    else:
+        price = normalize_price_row(row, price)
+    result = price * row["weight_attribute_1"]
+    for i in range(2,num_attributes + 1):
+            result += (row[f"{variable}_a{i}_callibrated"] * row[f"weight_attribute_{i}"])
+    return result
+
+def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01), variable="cu", num_attributes = 5):
+    """
+    return a series of points. Assumes only one row with the region value.
+    """
+    ms_points = []
+    region_row = input_df.loc[input_df["region"] == region].iloc[0]
+    tau = region_row["tau_value"]
+    if variable == "cu":
+        al_utility = region_row["al_utility"]
+        for price in price_range:
+            cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    elif variable == "al":
+        cu_utility = region_row["cu_utility"]
+        for price in price_range:
+            cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    else:
+        raise ValueError("Invalid input")
+    return ms_points
+
 ####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
@@ -222,6 +262,7 @@ result = normalize_attributes(result)
 result = calc_utilities(result)
 result = tau_callibrate_df(result)
 print(result.columns)
+print(point_generation_price(result,"India"))
 # print(get_true_mins_maxes(test2_df,1))
 
 # global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
