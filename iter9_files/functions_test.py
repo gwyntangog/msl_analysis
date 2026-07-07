@@ -185,6 +185,21 @@ class testTauFunctions(unittest.TestCase):
 
 ######################
 
+from functions import sanity_check
+
+class testSanityCheck(unittest.TestCase):
+    """
+    """
+    test_df = pd.DataFrame([{"weight_attribute_1": 0.3, "weight_attribute_2":0.7,'direction_attribute_1': "positive", 'direction_attribute_2': "negative",
+                                 'cu_attribute_1_value':5,'cu_attribute_2_value':5,
+       'al_attribute_1_value':0,'al_attribute_2_value':0,'attribute_1_min':0,
+       'attribute_1_max':5, 'attribute_2_min':0, 'attribute_2_max':10,
+       "cu_a1_callibrated":1.0, "al_a1_callibrated":0.0,"cu_a2_callibrated":0.5, "al_a2_callibrated":1.0}])
+    def test_sanity1(self):
+        print(sanity_check(self.test_df, 2))
+
+
+
 # write tests for the following: calc_product_cost_row, normalize_product_cost_row,  calc_utility_row, point_generation_price, generate_graph
 
 
