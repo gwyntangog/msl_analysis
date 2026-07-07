@@ -273,6 +273,33 @@ def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01),
         raise ValueError("Invalid input")
     return ms_points
 
+def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
+    """
+    Change ratios.
+    """
+    ms_points = []
+    region_row = input_df.loc[input_df["region"] == region].iloc[0]
+    tau = region_row["tau_value"]
+    if hold == "al":
+        for ratio in ratio_range:
+            al_material_cost = hold_value
+            cu_material_cost = hold_value*ratio
+            al_utility = calc_utility_row(region_row, cu_material_cost = cu_material_cost, al_material_cost=al_material_cost, num_attributes=num_attributes, variable = "al")
+            cu_utility = calc_utility_row(region_row,cu_material_cost = cu_material_cost, al_material_cost = al_material_cost, num_attributes = num_attributes, variable = "cu")
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    elif hold == "cu":
+        for ratio in ratio_range:
+            al_material_cost = hold_value/ratio
+            cu_material_cost = hold_value
+            al_utility = calc_utility_row(region_row, cu_material_cost = cu_material_cost, al_material_cost=al_material_cost, num_attributes=num_attributes, variable = "al")
+            cu_utility = calc_utility_row(region_row,cu_material_cost = cu_material_cost, al_material_cost = al_material_cost, num_attributes = num_attributes, variable = "cu")
+            ms = ms_logit(cu_utility, al_utility, tau)
+            ms_points.append(ms)
+    else:
+        raise ValueError("Invalid input")
+    return ms_points
+
 # def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
 #     ms_points = []
 #     region_row = input_df.loc[input_df["region"] == region].iloc[0]
@@ -295,7 +322,7 @@ def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01),
 #         raise ValueError("Invalid input")
 #     return ms_points
 
-def generate_graph(df, region, x,y):
+def generate_graph(df, region, x,y, ratio = False):
     plt.figure(figsize=(7, 4.5))
 
     # main line (model)
@@ -306,21 +333,45 @@ def generate_graph(df, region, x,y):
     region_row = df[df["region"] == region].iloc[0]
     x_special = region_row["copper_price_per_kg"]
     y_special = region_row["copper_product_market_share"]
-    plt.scatter(
-        x_special,
-        y_special,
-        color="red",
-        s=100,           # marker size
-        marker="o",      # circle
-        zorder=5,        # draw on top of the line
-        label="Observed point"
-    )
+    if not ratio:
+        plt.scatter(
+            x_special,
+            y_special,
+            color="red",
+            s=100,           # marker size
+            marker="o",      # circle
+            zorder=5,        # draw on top of the line
+            label="Observed point"
+        )
     # plt.xlabel(xlabel, fontsize=11)
     plt.ylabel("Copper Product Market Share", fontsize=11)
     plt.legend()
     plt.tight_layout()
     plt.show()
     plt.clf()
+
+def step_tau_df(df, max_steps = 50):
+    return
+
+def step_tau_row(row, max_steps = 50):
+    #'weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
+    #'weight_attribute_4', 'weight_attribute_5'
+    new_row = row.copy()
+    cu_utility = calc_utility_row(row, variable = "cu")
+    al_utility = calc_utility_row(row, variable = "al")
+    market_share_cu = row["copper_product_market_share"]
+    current_tau = tau_callibrate(cu_utility, al_utility, market_share_cu)
+    new_row["tau_value"] = current_tau
+    if current_tau <= 0:
+        new_row["weight_attribute_2"] = new_row["weight_attribute_2"]+0.1
+        new_row["weight_attribute_1"] = new_row["weight_attribute_1"]-0.025
+        new_row["weight_attribute_3"] = new_row["weight_attribute_3"]-0.025
+        new_row["weight_attribute_4"] = new_row["weight_attribute_4"]-0.025
+        new_row["weight_attribute_5"] = new_row["weight_attribute_5"]-0.025
+        return step_tau_row(new_row)
+    else:
+        return new_row
+
 ####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
@@ -332,14 +383,23 @@ result = get_true_mins_maxes(result)
 # print(f"min is {result["attribute_1_min"]}")
 result = normalize_attributes(result)
 result = calc_utilities(result)
+print(result.columns)
+print("------------------------- before tau calibrate")
 result = tau_callibrate_df(result)
 print(result.columns)
-print(result[result["region"] == "India"][["copper_product_market_share", "copper_price_per_kg"]])
+print(result[result["region"] == "India"][["copper_product_market_share", "copper_price_per_kg", "tau_value"]])
 x = np.arange(0.1,20, 0.1)
 y = point_generation_price(result,"India", price_range = x)
-generate_graph(result, "India", x, y)
 current_row = result.loc[result["region"]== "India"].iloc[0]
-# print(y)
+
+x = np.arange(0.1,2, 0.01)
+y = point_generation_ratio(result,"India")
+
+new_row = step_tau_row(current_row)
+print(new_row)
+# generate_graph(result, "India", x, y, ratio = True)
+
+
 
 # cu_utility = calc_utility_row(current_row, 10.1)
 # cu_utility2 = calc_utility_row(current_row)
