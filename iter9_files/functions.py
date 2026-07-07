@@ -428,6 +428,44 @@ def find_fit(x,y):
     popt, pcov = curve_fit(exponential_model, x_data, y_data)
 
     print(f"Best-fit equation: y = {popt[0]:.2f} * e^({popt[1]:.2f} * x)")
+    import numpy as np
+
+    # 1. Your experimental/observed data points
+    x_points = np.array([1, 2, 3, 4, 5])
+    y_actual = np.array([2.1, 3.9, 6.2, 8.1, 10.2])
+
+    # 2. Your equation model (e.g., y = 2x)
+    def equation(x):
+        return 2 * x
+
+    # 3. Generate the predicted y-values using your equation
+    y_predicted = equation(x_points)
+
+    # Raw difference for each point
+    residuals = y_actual - y_predicted
+    print("Errors per point:", residuals)
+    # Output: [ 0.1 -0.1  0.2  0.1  0.2]
+
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+    # Mean Absolute Error (MAE) - Average magnitude of error
+    mae = mean_absolute_error(y_actual, y_predicted)
+
+    # Mean Squared Error (MSE) - Penalizes larger errors heavily
+    mse = mean_squared_error(y_actual, y_predicted)
+
+    # Root Mean Squared Error (RMSE) - Error in the same units as y
+    rmse = np.sqrt(mse)
+
+    print(f"MAE: {mae:.4f}")   # Output: 0.1400
+    print(f"MSE: {mse:.4f}")   # Output: 0.0220
+    print(f"RMSE: {rmse:.4f}") # Output: 0.1483
+
+    mae_np = np.mean(np.abs(y_actual - y_predicted))
+    mse_np = np.mean((y_actual - y_predicted) ** 2)
+    rmse_np = np.sqrt(mse_np)
+
+
 
 
 
