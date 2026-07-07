@@ -372,6 +372,18 @@ def step_tau_row(row, max_steps = 50):
     else:
         return new_row
 
+def step_tau_df(df):
+    """
+    returns a new df
+    """
+    result = pd.DataFrame()
+    for _, row in df.iterrows():
+        new_row = step_tau_row(row)
+        result = pd.concat([result, new_row], axis = 1)
+    result = result.T
+    return result
+
+
 ####################### TESTING
 
 result = parse_pdf("Final Product Variables.pdf")
@@ -397,6 +409,11 @@ y = point_generation_ratio(result,"India")
 
 new_row = step_tau_row(current_row)
 print(new_row)
+
+new_df = step_tau_df(result)
+print(new_df)
+print(new_df[['weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
+       'weight_attribute_4', 'weight_attribute_5']])
 # generate_graph(result, "India", x, y, ratio = True)
 
 
