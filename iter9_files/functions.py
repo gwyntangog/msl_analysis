@@ -394,6 +394,41 @@ def sanity_check(df, num_attributes = 5):
             result[f"a{i}_values"] = "INCONSISTENT"
     return result
 
+def find_fit(x,y):
+    """
+    test power curve
+    """
+    # Test poly fit
+    import numpy as np
+
+    # Sample data
+    x = np.array([1, 2, 3, 4, 5])
+    y = np.array([2.3, 4.5, 6.1, 8.0, 10.4])
+
+    # Find best-fit line (degree 1)
+    # Returns [slope, intercept]
+    slope, intercept = np.polyfit(x, y, 1)
+
+    print(f"Best-fit equation: y = {slope:.2f}x + {intercept:.2f}")
+
+    # TEST POWER CURVE FIT
+
+    import numpy as np
+    from scipy.optimize import curve_fit
+
+    # 1. Define the custom mathematical function template
+    def exponential_model(x, a, b):
+        return a * np.exp(b * x)
+
+    # Sample data
+    x_data = np.array([1, 2, 3, 4, 5])
+    y_data = np.array([2.5, 7.3, 20.1, 54.2, 148.0])
+
+    # 2. Fit the parameters (popt holds optimal values for a and b)
+    popt, pcov = curve_fit(exponential_model, x_data, y_data)
+
+    print(f"Best-fit equation: y = {popt[0]:.2f} * e^({popt[1]:.2f} * x)")
+
 
 
 ####################### TESTING
