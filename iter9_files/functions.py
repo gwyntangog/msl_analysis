@@ -414,6 +414,11 @@ new_df = step_tau_df(result)
 print(new_df)
 print(new_df[['weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
        'weight_attribute_4', 'weight_attribute_5']])
+
+x = np.arange(0.1,20, 0.1)
+y = point_generation_price(new_df,"India", price_range = x)
+current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
+generate_graph(new_df, "India", x, y, ratio = False)
 # generate_graph(result, "India", x, y, ratio = True)
 
 
