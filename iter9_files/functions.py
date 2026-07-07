@@ -300,28 +300,6 @@ def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_r
         raise ValueError("Invalid input")
     return ms_points
 
-# def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
-#     ms_points = []
-#     region_row = input_df.loc[input_df["region"] == region].iloc[0]
-#     tau = region_row["tau_value"]
-#     if hold == "al":
-#         al_utility = calc_utility_row(region_row, hold_value, "al", num_attributes=num_attributes)
-#         for ratio in ratio_range:
-#             price = ratio*hold_value
-#             cu_utility = calc_utility_row(region_row,price, "cu", num_attributes = num_attributes)
-#             ms = ms_logit(cu_utility, al_utility, tau)
-#             ms_points.append(ms)
-#     elif hold == "cu":
-#         cu_utility = calc_utility_row(region_row, hold_value, "cu", num_attributes=num_attributes)
-#         for ratio in ratio_range:
-#             price = hold_value/ratio
-#             cu_utility = calc_utility_row(region_row, price, "al",num_attributes = num_attributes)
-#             ms = ms_logit(cu_utility, al_utility, tau)
-#             ms_points.append(ms)
-#     else:
-#         raise ValueError("Invalid input")
-#     return ms_points
-
 def generate_graph(df, region, x,y, ratio = False):
     plt.figure(figsize=(7, 4.5))
 
@@ -350,8 +328,6 @@ def generate_graph(df, region, x,y, ratio = False):
     plt.show()
     plt.clf()
 
-def step_tau_df(df, max_steps = 50):
-    return
 
 def step_tau_row(row, max_steps = 50):
     #'weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
@@ -368,7 +344,7 @@ def step_tau_row(row, max_steps = 50):
         new_row["weight_attribute_3"] = new_row["weight_attribute_3"]-0.025
         new_row["weight_attribute_4"] = new_row["weight_attribute_4"]-0.025
         new_row["weight_attribute_5"] = new_row["weight_attribute_5"]-0.025
-        return step_tau_row(new_row)
+        return step_tau_row(new_row, max_steps -1)
     else:
         return new_row
 
