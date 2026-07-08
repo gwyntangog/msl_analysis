@@ -476,7 +476,7 @@ y = point_generation_price(new_df,"India", price_range = x)
 current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
 print(find_poly_fit(x,y))
 print(find_power_fit(x,y))
-# generate_graph(new_df, "India", x, y, ratio = False)
+generate_graph(new_df, "India", x, y, ratio = False)
 # generate_graph(result, "India", x, y, ratio = True)
 
 
