@@ -8,6 +8,10 @@ import statsmodels.api as sm
 import os
 import re
 import ast
+from scipy.optimize import curve_fit
+from numpy.polynomial import Polynomial
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from scipy.optimize import curve_fit
 
 # PHASE 1: Normal finding tau
 # PHASE 2: Tau callibrate step
@@ -394,78 +398,43 @@ def sanity_check(df, num_attributes = 5):
             result[f"a{i}_values"] = "INCONSISTENT"
     return result
 
-def find_fit(x,y):
+def find_poly_fit(x,y, max_deg = 3):
     """
     test power curve
     """
-    # Test poly fit
-    import numpy as np
+    ##### POLY FIT
+    polyfits = {}
+    errors = {}
+    current_error = np.inf
+    current_eqtn = None
+    for i in range(1,max_deg +1):
+        p_fitted = Polynomial.fit(x, y, i)
+        y_pred = p_fitted(x)
+        mse = mean_squared_error(y, y_pred)
+        rmse = np.sqrt(mse)
+        polyfits[f"fit_{i}"] = p_fitted
+        errors[f"fit_{i}"] = rmse
+        if rmse < current_error:
+            current_error = rmse
+            current_eqtn = p_fitted
+    return current_eqtn.convert()
 
-    # Sample data
-    x = np.array([1, 2, 3, 4, 5])
-    y = np.array([2.3, 4.5, 6.1, 8.0, 10.4])
+def find_power_fit(x,y):
 
-    # Find best-fit line (degree 1)
-    # Returns [slope, intercept]
-    slope, intercept = np.polyfit(x, y, 1)
-
-    print(f"Best-fit equation: y = {slope:.2f}x + {intercept:.2f}")
-
-    # TEST POWER CURVE FIT
-
-    import numpy as np
-    from scipy.optimize import curve_fit
-
-    # 1. Define the custom mathematical function template
     def exponential_model(x, a, b):
         return a * np.exp(b * x)
 
-    # Sample data
-    x_data = np.array([1, 2, 3, 4, 5])
-    y_data = np.array([2.5, 7.3, 20.1, 54.2, 148.0])
+    popt, pcov = curve_fit(exponential_model, x, y)
 
-    # 2. Fit the parameters (popt holds optimal values for a and b)
-    popt, pcov = curve_fit(exponential_model, x_data, y_data)
+    # print(f"Best-fit equation: y = {popt[0]:.2f} * e^({popt[1]:.2f} * x)")
 
-    print(f"Best-fit equation: y = {popt[0]:.2f} * e^({popt[1]:.2f} * x)")
-    import numpy as np
-
-    # 1. Your experimental/observed data points
-    x_points = np.array([1, 2, 3, 4, 5])
-    y_actual = np.array([2.1, 3.9, 6.2, 8.1, 10.2])
-
-    # 2. Your equation model (e.g., y = 2x)
     def equation(x):
-        return 2 * x
+        return (popt[0] * (np.e**(popt[1] * x)))
 
-    # 3. Generate the predicted y-values using your equation
-    y_predicted = equation(x_points)
-
-    # Raw difference for each point
-    residuals = y_actual - y_predicted
-    print("Errors per point:", residuals)
-    # Output: [ 0.1 -0.1  0.2  0.1  0.2]
-
-    from sklearn.metrics import mean_squared_error, mean_absolute_error
-
-    # Mean Absolute Error (MAE) - Average magnitude of error
-    mae = mean_absolute_error(y_actual, y_predicted)
-
-    # Mean Squared Error (MSE) - Penalizes larger errors heavily
-    mse = mean_squared_error(y_actual, y_predicted)
-
-    # Root Mean Squared Error (RMSE) - Error in the same units as y
+    y_pred = equation(x)
+    mse = mean_squared_error(y, y_pred)
     rmse = np.sqrt(mse)
-
-    print(f"MAE: {mae:.4f}")   # Output: 0.1400
-    print(f"MSE: {mse:.4f}")   # Output: 0.0220
-    print(f"RMSE: {rmse:.4f}") # Output: 0.1483
-
-    mae_np = np.mean(np.abs(y_actual - y_predicted))
-    mse_np = np.mean((y_actual - y_predicted) ** 2)
-    rmse_np = np.sqrt(mse_np)
-
-
+    return rmse, popt
 
 
 
@@ -505,6 +474,8 @@ print(new_df[['weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
 x = np.arange(0.1,20, 0.1)
 y = point_generation_price(new_df,"India", price_range = x)
 current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
+print(find_poly_fit(x,y))
+print(find_power_fit(x,y))
 # generate_graph(new_df, "India", x, y, ratio = False)
 # generate_graph(result, "India", x, y, ratio = True)
 
