@@ -300,8 +300,7 @@ class testPointGenPrice(unittest.TestCase):
         result = point_generation_price(self.df, region = "India", price_range = [3,5], num_attributes = 2)
         result = np.round(result,2)
         result = result.tolist()
-        # cu cost = 1 + 6 + 2 = 9 = , al cost = 1 + 3 + 1 = 5
-        expected = [0.40,0.39] #0.35
+        expected = [0.4,0.39]
         self.assertListEqual(result, expected)
 
 class testPointGenRatio(unittest.TestCase):
