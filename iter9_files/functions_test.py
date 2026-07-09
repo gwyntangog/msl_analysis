@@ -243,6 +243,28 @@ class testProductCostRow(unittest.TestCase):
         self.assertEqual(result,expected)
 
 
+class testNormalizeProductCostRow(unittest.TestCase):
+    """
+    """
+    row = pd.DataFrame([{"attribute_1_max":100,"attribute_1_min":10}]).iloc[0]
+    def test_normalize_product_row1(self):
+        result = normalize_product_cost_row(self.row, 100)
+        result = round(result,2)
+        expected = round(0,2)
+        self.assertEqual(result, expected)
+    def test_normalize_product_row2(self):
+        result = normalize_product_cost_row(self.row, 10)
+        result = round(result,2)
+        expected = round(1,2)
+        self.assertEqual(result, expected)
+    def test_normalize_product_row3(self):
+        result = normalize_product_cost_row(self.row, 50)
+        result = round(result,2)
+        expected = round(5/9,2)
+        self.assertEqual(result, expected)
+
+
+
 # write tests for the following: normalize_product_cost_row,  calc_utility_row, point_generation_price
 
 ######################
