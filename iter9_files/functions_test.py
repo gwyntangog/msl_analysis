@@ -210,9 +210,40 @@ class testSanityCheck(unittest.TestCase):
         self.assertDictEqual(result, expected)
 
 
+class testProductCostRow(unittest.TestCase):
+    """
+    """
+    row = pd.DataFrame([{"cu_non_material_cost_per_unit":100,"al_non_material_cost_per_unit":50,
+                             "cu_copper_kg": 5,  "al_copper_kg": 2,
+                              "cu_aluminum_kg":1, "al_aluminum_kg":4,
+                                "copper_price_per_kg": 5, "aluminum_price_per_kg":2}]).iloc[0]
+    def test_cost_row1(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = None, al_material_cost = None, variable = "cu")
+        expected = 127
+        self.assertEqual(result,expected)
+    def test_cost_row2(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = None, al_material_cost = None, variable = "al")
+        expected = 68
+        self.assertEqual(result,expected)
+    def test_cost_row3(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = 10, al_material_cost = None, variable = "cu")
+        expected = 152
+        self.assertEqual(result,expected)
+    def test_cost_row4(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = 10, al_material_cost = 0, variable = "cu")
+        expected = 150
+        self.assertEqual(result,expected)
+    def test_cost_row5(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = 10, al_material_cost = None, variable = "al")
+        expected = 78
+        self.assertEqual(result,expected)
+    def test_cost_row6(self):
+        result = calc_product_cost_row(self.row, cu_material_cost = 10, al_material_cost = 0, variable = "al")
+        expected = 70
+        self.assertEqual(result,expected)
 
-# write tests for the following: calc_product_cost_row, normalize_product_cost_row,  calc_utility_row, point_generation_price, generate_graph
 
+# write tests for the following: normalize_product_cost_row,  calc_utility_row, point_generation_price
 
 ######################
 

@@ -314,7 +314,7 @@ def generate_graph(df, region, x,y, ratio = False, xlabel = None):
     y_special = region_row["copper_product_market_share"]
     if not ratio:
         plt.scatter(
-            x_special,
+            1000*x_special,
             y_special,
             color="red",
             s=100,           # marker size
@@ -476,7 +476,7 @@ y = point_generation_price(new_df,"India", price_range = x)
 current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
 print(find_poly_fit(x,y))
 print(find_power_fit(x,y))
-generate_graph(new_df, "India", x, y, ratio = False, xlabel ="Copper Price ($/kg)")
+# generate_graph(new_df, "India", 1000*x, y, ratio = False, xlabel ="Copper Price ($/tonne)")
 # generate_graph(result, "India", x, y, ratio = True)
 
 
