@@ -304,12 +304,9 @@ def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_r
         raise ValueError("Invalid input")
     return ms_points
 
-def generate_graph(df, region, x,y, ratio = False):
+def generate_graph(df, region, x,y, ratio = False, xlabel = None):
     plt.figure(figsize=(7, 4.5))
-
-    # main line (model)
     plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
-    # axes limits
     plt.ylim(-0.05, 1.05)
     plt.grid(True, linestyle="--", alpha=0.3)
     region_row = df[df["region"] == region].iloc[0]
@@ -325,7 +322,10 @@ def generate_graph(df, region, x,y, ratio = False):
             zorder=5,        # draw on top of the line
             label="Observed point"
         )
-    # plt.xlabel(xlabel, fontsize=11)
+    if xlabel:
+        plt.xlabel(xlabel, fontsize=11)
+        plt.suptitle(f"{xlabel} vs Copper Product Market Share in {region}", fontsize=13, fontweight="bold")
+    plt.grid(True, linestyle="--", alpha=0.3)
     plt.ylabel("Copper Product Market Share", fontsize=11)
     plt.legend()
     plt.tight_layout()
@@ -476,7 +476,7 @@ y = point_generation_price(new_df,"India", price_range = x)
 current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
 print(find_poly_fit(x,y))
 print(find_power_fit(x,y))
-generate_graph(new_df, "India", x, y, ratio = False)
+generate_graph(new_df, "India", x, y, ratio = False, xlabel ="Copper Price ($/kg)")
 # generate_graph(result, "India", x, y, ratio = True)
 
 
