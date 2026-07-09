@@ -265,7 +265,7 @@ class testNormalizeProductCostRow(unittest.TestCase):
 
 
 
-# write tests for the following: normalize_product_cost_row,  calc_utility_row, point_generation_price
+# write tests for the following: calc_utility_row, point_generation_price, point_generation_ratio
 
 ######################
 
