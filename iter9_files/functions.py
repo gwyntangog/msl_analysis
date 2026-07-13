@@ -495,4 +495,5 @@ def run_through_file(filename):
 
 ####################### TESTING
 
-run_through_file('iter9_pdfs/interconnect.pdf')
+# run_through_file('iter9_pdfs/interconnect.pdf')
+run_through_file('iter9_pdfs/busbars.pdf')
