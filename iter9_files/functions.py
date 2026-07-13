@@ -95,6 +95,18 @@ def calc_product_cost(input_df, cu_material_cost =None, al_material_cost = None,
 test_df = pd.DataFrame([{"cu_nonmaterial": 500, "cu_copper_kg": 5, "cu_aluminum_kg": 2, "cu_material_cost": 7,
              "al_nonmaterial": 550, "al_copper_kg": 2, "al_aluminum_kg":3, "al_material_cost": 3}])
 
+####################333 PARSING
+from io import StringIO
+import tokenize
+
+def strip_comments(text):
+    tokens = tokenize.generate_tokens(StringIO(text).readline)
+    return tokenize.untokenize(
+        (tok_type, tok_string)
+        for tok_type, tok_string, *_ in tokens
+        if tok_type != tokenize.COMMENT
+    )
+
 def parse_pdf(pdf_path):
 
     """
@@ -106,6 +118,7 @@ def parse_pdf(pdf_path):
     with fitz.open(pdf_path) as doc:
         text = "\n".join(page.get_text() for page in doc)
 
+    text = strip_comments(text)
     for name in ["global_data", "regional_data", "product_data"]:
         match = re.search(
             rf'{name}\s*=\s*(\{{.*?\}}|\[.*?\])',
@@ -304,15 +317,28 @@ def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_r
         raise ValueError("Invalid input")
     return ms_points
 
-def generate_graph(df, region, x,y, ratio = False, xlabel = None):
+def generate_graph(df, region, x,y, xlabel = None, material = None):
+    product = df["cu_product"].iloc[0]
     plt.figure(figsize=(7, 4.5))
     plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
     plt.ylim(-0.05, 1.05)
     plt.grid(True, linestyle="--", alpha=0.3)
     region_row = df[df["region"] == region].iloc[0]
-    x_special = region_row["copper_price_per_kg"]
-    y_special = region_row["copper_product_market_share"]
-    if not ratio:
+    if material == "cu":
+        x_special = region_row["copper_price_per_kg"]
+        y_special = region_row["copper_product_market_share"]
+        plt.scatter(
+            1000*x_special,
+            y_special,
+            color="red",
+            s=100,           # marker size
+            marker="o",      # circle
+            zorder=5,        # draw on top of the line
+            label="Observed point"
+        )
+    elif material == "al":
+        x_special = region_row["aluminum_price_per_kg"]
+        y_special = region_row["copper_product_market_share"]
         plt.scatter(
             1000*x_special,
             y_special,
@@ -324,12 +350,18 @@ def generate_graph(df, region, x,y, ratio = False, xlabel = None):
         )
     if xlabel:
         plt.xlabel(xlabel, fontsize=11)
-        plt.suptitle(f"{xlabel} vs Copper Product Market Share in {region}", fontsize=13, fontweight="bold")
+        plt.suptitle(f"{product}, {region}",fontsize=13, fontweight="bold")
+        plt.title(f"{xlabel} vs Copper Product Market Share")
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.ylabel("Copper Product Market Share", fontsize=11)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    os.makedirs(f"iter9_graphs/{product}/{xlabel}", exist_ok=True)
+    plt.savefig(
+            f"iter9_graphs/{product}/{xlabel}/{region}.png",
+            dpi=300,
+            bbox_inches="tight"
+        )
     plt.clf()
 
 
@@ -436,73 +468,31 @@ def find_power_fit(x,y):
     rmse = np.sqrt(mse)
     return rmse, popt
 
+############# MAKE FUNCTIONS FOR ALL REGIONS
+
+def run_through_file(filename):
+    result = parse_pdf(filename)
+    result = calc_product_cost(result)
+    result = get_true_mins_maxes(result)
+    result = normalize_attributes(result)
+    result = calc_utilities(result)
+    result = tau_callibrate_df(result)
+    result = step_tau_df(result)
+
+    # GRAPHING
+    regions_list = result["region"].tolist()
+    for region in regions_list:
+        x = np.arange(0.1,20, 0.1)
+        y = point_generation_price(result,region, price_range = x, variable = "cu")
+        generate_graph(result, region, 1000*x, y, xlabel ="Copper Price (dollars per tonne)", material = "cu")
+        y = point_generation_price(result,region, price_range = x, variable = "al")
+        generate_graph(result, region, 1000*x, y, xlabel ="Aluminum Price (dollars per tonne)", material = "al")
+        x = np.arange(0.1,3,0.1)
+        y = point_generation_ratio(result,region, ratio_range = x)
+        generate_graph(result, region, x, y, xlabel ="Ratio of Copper Price to Aluminum Price")
+
 
 
 ####################### TESTING
 
-result = parse_pdf("Final Product Variables.pdf")
-result = calc_product_cost(result)
-print("--------------- sanity check below------------")
-print(sanity_check(result))
-# print(f"max is {result["attribute_1_max"]}")
-# print(f"min is {result["attribute_1_min"]}")
-result = get_true_mins_maxes(result)
-# print(f"max is {resulgit["attribute_1_max"]}")
-# print(f"min is {result["attribute_1_min"]}")
-result = normalize_attributes(result)
-result = calc_utilities(result)
-print(result.columns)
-print("------------------------- before tau calibrate")
-result = tau_callibrate_df(result)
-print(result.columns)
-print(result[result["region"] == "India"][["copper_product_market_share", "copper_price_per_kg", "tau_value"]])
-x = np.arange(0.1,20, 0.1)
-y = point_generation_price(result,"India", price_range = x)
-current_row = result.loc[result["region"]== "India"].iloc[0]
-
-x = np.arange(0.1,2, 0.01)
-y = point_generation_ratio(result,"India")
-
-new_row = step_tau_row(current_row)
-print(new_row)
-
-new_df = step_tau_df(result)
-print(new_df)
-print(new_df[['weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
-       'weight_attribute_4', 'weight_attribute_5']])
-
-x = np.arange(0.1,20, 0.1)
-y = point_generation_price(new_df,"India", price_range = x)
-current_row = new_df.loc[new_df["region"]== "India"].iloc[0]
-print(find_poly_fit(x,y))
-print(find_power_fit(x,y))
-# generate_graph(new_df, "India", 1000*x, y, ratio = False, xlabel ="Copper Price ($/tonne)")
-# generate_graph(result, "India", x, y, ratio = True)
-
-
-
-# cu_utility = calc_utility_row(current_row, 10.1)
-# cu_utility2 = calc_utility_row(current_row)
-# al_utility = calc_utility_row(current_row, variable = "al")
-# normal1 = normalize_price_row(current_row, 10.1)
-# normal2 = current_row["cu_a1_callibrated"]
-# tau_val = current_row["tau_value"]
-# print(current_row["direction_attribute_1"])
-# print(f"max is {current_row["attribute_1_max"]}")
-# print(f"min is {current_row["attribute_1_min"]}")
-# print(f"normal_1 is {normal1}")
-# print(f"normal_2 is {normal2}")
-# print(f"cu_utility_1 is {cu_utility}")
-# print(f"cu_utility_2 is {cu_utility2}")
-# print(al_utility)
-# print(tau_val)
-# print(ms_logit(cu_utility, al_utility,tau_val))
-# print(get_true_mins_maxes(test2_df,1))
-
-# global_data, regional_data, product_data = parse_pdf("Final Product Variables.pdf")
-# global_data = global_data.loc[global_data.index.repeat(8)].reset_index(drop=True)
-# merged_df = pd.merge(regional_data, product_data, on='region')
-# result = pd.concat([merged_df,global_data], axis = 1)
-# print(merged_df)
-# print(result)
-########## DATA STRUCTURE NOTES
+run_through_file('iter9_pdfs/interconnect.pdf')
