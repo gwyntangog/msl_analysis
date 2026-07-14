@@ -317,12 +317,17 @@ def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_r
         raise ValueError("Invalid input")
     return ms_points
 
-def generate_graph(df, region, x,y, xlabel = None, material = None):
+def generate_graph(df, region, x,y, xlabel = None, material = None, save = True):
     product = df["cu_product"].iloc[0]
-    plt.figure(figsize=(7, 4.5))
-    plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
-    plt.ylim(-0.05, 1.05)
-    plt.grid(True, linestyle="--", alpha=0.3)
+    if save:
+        plt.figure(figsize=(7, 4.5))
+        plt.ylim(-0.05, 1.05)
+        plt.grid(True, linestyle="--", alpha=0.3)
+        plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
+        point_label = "Observed point"
+    else:
+        plt.plot(x, y, linewidth=2.5, label=region)
+        point_label = f"Observed point ({region})"
     region_row = df[df["region"] == region].iloc[0]
     if material == "cu":
         x_special = region_row["copper_price_per_kg"]
@@ -330,11 +335,11 @@ def generate_graph(df, region, x,y, xlabel = None, material = None):
         plt.scatter(
             1000*x_special,
             y_special,
-            color="red",
             s=100,           # marker size
             marker="o",      # circle
             zorder=5,        # draw on top of the line
-            label="Observed point"
+            label = point_label
+
         )
     elif material == "al":
         x_special = region_row["aluminum_price_per_kg"]
@@ -342,11 +347,10 @@ def generate_graph(df, region, x,y, xlabel = None, material = None):
         plt.scatter(
             1000*x_special,
             y_special,
-            color="red",
             s=100,           # marker size
             marker="o",      # circle
             zorder=5,        # draw on top of the line
-            label="Observed point"
+            label=point_label
         )
     if xlabel:
         plt.xlabel(xlabel, fontsize=11)
@@ -356,14 +360,38 @@ def generate_graph(df, region, x,y, xlabel = None, material = None):
     plt.ylabel("Copper Product Market Share", fontsize=11)
     plt.legend()
     plt.tight_layout()
+    if save:
+        os.makedirs(f"iter9_graphs/{product}/{xlabel}", exist_ok=True)
+        plt.savefig(
+                f"iter9_graphs/{product}/{xlabel}/{region}.png",
+                dpi=300,
+                bbox_inches="tight"
+            )
+        plt.close()
+
+def generate_master_graph(df,x, xlabel = None, material = None):
+    plt.figure(figsize=(7, 4.5))
+    plt.ylim(-0.05, 1.05)
+    plt.grid(True, linestyle="--", alpha=0.3)
+    for region in df["region"].tolist():
+        if material == "cu":
+            y = point_generation_price(df, region, price_range = x, variable="cu", num_attributes = 5)
+            generate_graph(df, region, 1000*x,y, xlabel, material, save = False)
+        elif material == "al":
+            y = point_generation_price(df, region, price_range = x, variable="al", num_attributes = 5)
+            generate_graph(df, region, 1000*x,y, xlabel, material, save = False)
+        else:
+            y = point_generation_ratio(df, region, hold = "al", hold_value = 2,ratio_range = x,num_attributes=5)
+            generate_graph(df, region, x,y, xlabel, material, save = False)
+    product = df["cu_product"].iloc[0]
+    plt.legend(fontsize="x-small")
     os.makedirs(f"iter9_graphs/{product}/{xlabel}", exist_ok=True)
     plt.savefig(
-            f"iter9_graphs/{product}/{xlabel}/{region}.png",
+            f"iter9_graphs/{product}/{xlabel}/All.png",
             dpi=300,
             bbox_inches="tight"
         )
-    plt.clf()
-
+    plt.close()
 
 def step_tau_row(row, max_steps = 50):
     #'weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
@@ -490,15 +518,18 @@ def run_through_file(filename):
         x = np.arange(0.1,3,0.1)
         y = point_generation_ratio(result,region, ratio_range = x)
         generate_graph(result, region, x, y, xlabel ="Ratio of Copper Price to Aluminum Price")
-
-
+    x = np.arange(0.1,20, 0.1)
+    generate_master_graph(result, x, xlabel ="Copper Price (dollars per tonne)", material = "cu" )
+    generate_master_graph(result, x,  xlabel ="Aluminum Price (dollars per tonne)", material = "al" )
+    x = np.arange(0.1,3,0.1)
+    generate_master_graph(result, x,  xlabel ="Ratio of Copper Price to Aluminum Price", material = None )
 
 ####################### TESTING
 
-# run_through_file('iter9_pdfs/interconnect.pdf')
+run_through_file('iter9_pdfs/interconnect.pdf')
 # run_through_file('iter9_pdfs/busbar.pdf')
 # run_through_file('iter9_pdfs/motor_winding.pdf')
 # run_through_file('iter9_pdfs/wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_busbar.pdf')
 # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-run_through_file('iter9_pdfs/ice_alternator.pdf')
+# run_through_file('iter9_pdfs/ice_alternator.pdf')
