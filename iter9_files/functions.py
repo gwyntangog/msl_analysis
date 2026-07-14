@@ -501,11 +501,19 @@ def find_power_fit(x,y):
 def run_through_file(filename):
     result = parse_pdf(filename)
     result = calc_product_cost(result)
+
+    product = result["cu_product"].iloc[0]
+    sanity_df = sanity_check(result)
+    sanity_df = pd.DataFrame([sanity_df])
+    sanity_df.to_csv(f"iter9_graphs/{product}/sanity_check.csv")
+
     result = get_true_mins_maxes(result)
     result = normalize_attributes(result)
     result = calc_utilities(result)
     result = tau_callibrate_df(result)
     result = step_tau_df(result)
+    result.to_csv(f"iter9_graphs/{product}/overall_data.csv", index=False)
+
 
     # GRAPHING
     regions_list = result["region"].tolist()
@@ -529,13 +537,13 @@ def run_through_file(filename):
 # run_through_file('iter9_pdfs/interconnect.pdf')
 # run_through_file('iter9_pdfs/busbar.pdf')
 # run_through_file('iter9_pdfs/motor_winding.pdf')
-# run_through_file('iter9_pdfs/wire_harness.pdf')
+run_through_file('iter9_pdfs/wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_busbar.pdf')
 # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_alternator.pdf')
 
-folder_path = Path("iter9_pdfs")
+# folder_path = Path("iter9_pdfs")
 
-# Loop through all CSV files in the folder
-for file_path in folder_path.glob("*.pdf"):
-    run_through_file(file_path)
+# # Loop through all CSV files in the folder
+# for file_path in folder_path.glob("*.pdf"):
+#     run_through_file(file_path)
