@@ -324,9 +324,11 @@ def generate_graph(df, region, x,y, xlabel = None, material = None, save = True)
         plt.ylim(-0.05, 1.05)
         plt.grid(True, linestyle="--", alpha=0.3)
         plt.plot(x, y, linewidth=2.5, color="tab:blue", label="Computed Points")
+        plt.suptitle(f"{product}, {region}",fontsize=13, fontweight="bold")
         point_label = "Observed point"
     else:
         plt.plot(x, y, linewidth=2.5, label=region)
+        plt.suptitle(f"{product}, All regions",fontsize=13, fontweight="bold")
         point_label = f"Observed point ({region})"
     region_row = df[df["region"] == region].iloc[0]
     if material == "cu":
@@ -354,7 +356,6 @@ def generate_graph(df, region, x,y, xlabel = None, material = None, save = True)
         )
     if xlabel:
         plt.xlabel(xlabel, fontsize=11)
-        plt.suptitle(f"{product}, {region}",fontsize=13, fontweight="bold")
         plt.title(f"{xlabel} vs Copper Product Market Share")
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.ylabel("Copper Product Market Share", fontsize=11)
