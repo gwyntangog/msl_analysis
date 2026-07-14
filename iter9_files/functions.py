@@ -498,4 +498,5 @@ def run_through_file(filename):
 # run_through_file('iter9_pdfs/interconnect.pdf')
 # run_through_file('iter9_pdfs/busbar.pdf')
 # run_through_file('iter9_pdfs/motor_winding.pdf')
-run_through_file('iter9_pdfs/wire_harness.pdf')
+# run_through_file('iter9_pdfs/wire_harness.pdf')
+run_through_file('iter9_pdfs/ice_busbar.pdf')
