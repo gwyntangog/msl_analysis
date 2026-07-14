@@ -98,7 +98,7 @@ class testMinsMaxes(unittest.TestCase):
     num_test_atts = 2
     def test_min_maxes(self):
         result = get_true_mins_maxes(self.test_df,self.num_test_atts)
-        print(result)
+        #print(result)
         pd.testing.assert_frame_equal(result, self.expected_df)
 
 ##########
@@ -118,7 +118,7 @@ class testNormalizeAttributes(unittest.TestCase):
     num_test_atts = 2
     def test_normalize(self):
         result = normalize_attributes(self.test_df,self.num_test_atts)
-        print(result)
+        #print(result)
         pd.testing.assert_frame_equal(result, self.expected_df)
 
 
@@ -139,7 +139,7 @@ class testUtilityCalcs(unittest.TestCase):
     num_test_atts = 2
     def test_utility_df(self):
         result = calc_utilities(self.test_df,self.num_test_atts)
-        print(result)
+        #print(result)
         pd.testing.assert_frame_equal(result, self.expected_df)
 
 ####
