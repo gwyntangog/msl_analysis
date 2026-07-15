@@ -587,6 +587,8 @@ def run_through_file(filename):
     result = step_tau_df(result)
     result.to_csv(f"iter9_graphs/{product}/overall_data.csv", index=False)
 
+    fit_results = []
+
 
     # GRAPHING
     regions_list = result["region"].tolist()
@@ -599,20 +601,25 @@ def run_through_file(filename):
         x = np.arange(0.1,3,0.1)
         y = point_generation_ratio(result,region, ratio_range = x)
         generate_graph(result, region, x, y, xlabel ="Ratio of Copper Price to Aluminum Price")
+        fit_results.append({"region":region}|try_all_fits(x,y))
     x = np.arange(0.1,20, 0.1)
     generate_master_graph(result, x, xlabel ="Copper Price (dollars per tonne)", material = "cu" )
     generate_master_graph(result, x,  xlabel ="Aluminum Price (dollars per tonne)", material = "al" )
     x = np.arange(0.1,3,0.1)
     generate_master_graph(result, x,  xlabel ="Ratio of Copper Price to Aluminum Price", material = None )
 
+    fit_results = pd.DataFrame(fit_results)
+    fit_results.to_csv(f"iter9_graphs/{product}/fit_results.csv", index=False)
+    return
+
 
 ####################### TESTING
 
-print(find_fit('iter9_pdfs/wire_harness.pdf'))
+# print(find_fit('iter9_pdfs/wire_harness.pdf'))
 # run_through_file('iter9_pdfs/interconnect.pdf')
 # run_through_file('iter9_pdfs/busbar.pdf')
 # run_through_file('iter9_pdfs/motor_winding.pdf')
-# run_through_file('iter9_pdfs/wire_harness.pdf')
+run_through_file('iter9_pdfs/wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_busbar.pdf')
 # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_alternator.pdf')
