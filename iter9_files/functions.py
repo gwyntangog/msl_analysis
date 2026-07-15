@@ -478,7 +478,7 @@ def find_poly_fit(x,y, max_deg = 3):
         if rmse < current_error:
             current_error = rmse
             current_eqtn = p_fitted
-    return current_eqtn.convert()
+    return {"error": current_error, "poly equation": current_eqtn}
 
 def find_power_fit(x,y):
 
@@ -495,7 +495,7 @@ def find_power_fit(x,y):
     y_pred = equation(x)
     mse = mean_squared_error(y, y_pred)
     rmse = np.sqrt(mse)
-    return rmse, popt
+    return {"error": rmse, "power fit coeffs": popt}
 
 ############# MAKE FUNCTIONS FOR ALL REGIONS
 
@@ -533,12 +533,63 @@ def run_through_file(filename):
     x = np.arange(0.1,3,0.1)
     generate_master_graph(result, x,  xlabel ="Ratio of Copper Price to Aluminum Price", material = None )
 
+def find_logit_fit(ratios, shares, s_min, s_max):
+    shares = np.array(shares)
+    ratios = np.array(ratios)
+    assert np.all(shares > s_min),  "S_c must be > S_min for log to be defined"
+    assert np.all(shares < s_max),  "S_c must be < S_max for log to be defined"
+    assert len(shares) >= 2,        "Need at least 2 data points"
+
+    # ── Build linearised system ──────────────────────────────────────────────────
+    #   A * x  -  B  =  y
+    #   where A = alpha,  B = alpha * beta
+    # ────────────────────────────────────────────────────────────────────────────
+    y = np.log((s_max - s_min) / (shares - s_min) - 1)   # RHS
+    x = ratios                                      # normalised pressure
+
+    M = np.column_stack([x, -np.ones_like(x)])          # design matrix [x | -1]
+
+    # ── Solve (least squares if overdetermined) ──────────────────────────────────
+    (A, B), residuals, rank, sv = np.linalg.lstsq(M, y, rcond=None)
+
+    alpha = A
+    beta  = B / A
+
+    print(f"alpha = {alpha:.6f}")
+    print(f"beta  = {beta:.6f}")
+
+    # ── Verification: reconstruct S_c and compare ─────────────────────────────────
+    y_pred = s_min + (s_max - s_min) / (1 + np.exp(alpha * (x - beta)))
+
+    mse = mean_squared_error(y, y_pred)
+    rmse = np.sqrt(mse)
+    return {"error": rmse, "alpha":alpha, "beta":beta}
+
+
+def find_fit(filename, region = "India"):
+    """Try to find a best fit line given that x and y where y is the ratio"""
+    result = parse_pdf(filename)
+    result = calc_product_cost(result)
+    result = get_true_mins_maxes(result)
+    result = normalize_attributes(result)
+    result = calc_utilities(result)
+    result = tau_callibrate_df(result)
+    result = step_tau_df(result)
+
+    x = np.arange(0.1,3,0.1)
+    y = point_generation_ratio(result,region, ratio_range = x)
+
+    line_fit = find_poly_fit(x,y)
+    power_fit = find_power_fit(x,y)
+    logit_fit = find_logit_fit(x, y, s_min=0, s_max=1)
+    return line_fit, power_fit, logit_fit
 ####################### TESTING
 
+print(find_fit('iter9_pdfs/wire_harness.pdf'))
 # run_through_file('iter9_pdfs/interconnect.pdf')
 # run_through_file('iter9_pdfs/busbar.pdf')
 # run_through_file('iter9_pdfs/motor_winding.pdf')
-run_through_file('iter9_pdfs/wire_harness.pdf')
+# run_through_file('iter9_pdfs/wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_busbar.pdf')
 # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
 # run_through_file('iter9_pdfs/ice_alternator.pdf')
