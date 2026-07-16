@@ -602,7 +602,7 @@ def run_through_file(filename):
     x = np.arange(0.1,20, 0.1)
     generate_master_graph(result, x, xlabel ="Copper Price (dollars per tonne)", material = "cu" )
     generate_master_graph(result, x,  xlabel ="Aluminum Price (dollars per tonne)", material = "al" )
-    x = np.arange(0.1,3,0.1)
+    x = np.arange(2,6,0.1)
     generate_master_graph(result, x,  xlabel ="Ratio of Copper Price to Aluminum Price", material = None )
 
     fit_results = pd.DataFrame(fit_results)
