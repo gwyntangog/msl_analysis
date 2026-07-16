@@ -290,7 +290,7 @@ def point_generation_price(input_df, region, price_range = np.arange(0,5, 0.01),
         raise ValueError("Invalid input")
     return ms_points
 
-def point_generation_ratio(input_df, region, hold = "al", hold_value = 2,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
+def point_generation_ratio(input_df, region, hold = "al", hold_value = 2.5,ratio_range =np.arange(0.1,2, 0.01),num_attributes=5):
     """
     Change ratios.
     """
@@ -564,7 +564,7 @@ def try_all_fits(x,y):
         best_dict["best"] = "Power"
     else:
         best_dict["best"] = "Logit"
-    return poly_fit | power_fit | logit_fit | best_dict
+    return best_dict | poly_fit | power_fit | logit_fit
 
 
 ################RUN ALL
