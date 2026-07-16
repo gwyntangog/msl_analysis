@@ -524,9 +524,6 @@ def find_logit_fit(ratios, shares, s_min=0, s_max = 1):
     alpha = A
     beta  = B / A
 
-    print(f"alpha = {alpha:.6f}")
-    print(f"beta  = {beta:.6f}")
-
     # ── Verification: reconstruct S_c and compare ─────────────────────────────────
     y_pred = s_min + (s_max - s_min) / (1 + np.exp(alpha * (x - beta)))
 
@@ -598,7 +595,7 @@ def run_through_file(filename):
         generate_graph(result, region, 1000*x, y, xlabel ="Copper Price (dollars per tonne)", material = "cu")
         y = point_generation_price(result,region, price_range = x, variable = "al")
         generate_graph(result, region, 1000*x, y, xlabel ="Aluminum Price (dollars per tonne)", material = "al")
-        x = np.arange(0.1,3,0.1)
+        x = np.arange(2,6,0.1)
         y = point_generation_ratio(result,region, ratio_range = x)
         generate_graph(result, region, x, y, xlabel ="Ratio of Copper Price to Aluminum Price")
         fit_results.append({"region":region}|try_all_fits(x,y))
@@ -616,13 +613,13 @@ def run_through_file(filename):
 ####################### TESTING
 
 # print(find_fit('iter9_pdfs/wire_harness.pdf'))
-# run_through_file('iter9_pdfs/interconnect.pdf')
-# run_through_file('iter9_pdfs/busbar.pdf')
-# run_through_file('iter9_pdfs/motor_winding.pdf')
+run_through_file('iter9_pdfs/interconnect.pdf')
+run_through_file('iter9_pdfs/busbar.pdf')
+run_through_file('iter9_pdfs/motor_winding.pdf')
 run_through_file('iter9_pdfs/wire_harness.pdf')
-# run_through_file('iter9_pdfs/ice_busbar.pdf')
-# run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-# run_through_file('iter9_pdfs/ice_alternator.pdf')
+run_through_file('iter9_pdfs/ice_busbar.pdf')
+run_through_file('iter9_pdfs/ice_wire_harness.pdf')
+run_through_file('iter9_pdfs/ice_alternator.pdf')
 
 # folder_path = Path("iter9_pdfs")
 
