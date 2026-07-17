@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Material Substitution Model</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header>
+    <span class="logo">⚡ Material Substitution Model</span>
+    <span class="subtitle" id="header-subtitle">Cu ↔ Al Market Share Analysis</span>
+  </header>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+    <aside class="sidebar">
+
+      <div class="sidebar-section">
+        <div class="section-label">Product</div>
+        <div id="product-selector"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">Regions</div>
+        <div class="row-mini">
+          <button class="btn-xs" id="btn-all">All</button>
+          <button class="btn-xs" id="btn-none">None</button>
+        </div>
+        <div id="region-list"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">Options</div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-observed" checked />
+          <span>Show observed points</span>
+        </label>
+        <label class="toggle" id="toggle-fits-wrap">
+          <input type="checkbox" id="toggle-fits" />
+          <span>Overlay fit curves <em>(ratio only)</em></span>
+        </label>
+      </div>
+
+    </aside>
+
+    <!-- ── Main ────────────────────────────────────────────────────────── -->
+    <main class="main">
+
+      <!-- Loading state -->
+      <div id="state-loading" class="state-view">
+        <div class="spinner"></div>
+        <p>Loading…</p>
+      </div>
+
+      <!-- Empty / error state -->
+      <div id="state-empty" class="state-view hidden">
+        <p class="muted">No products found.<br />
+           Run <code>python export_data.py</code>, commit
+           <code>docs/data/</code>, then refresh.</p>
+      </div>
+
+      <!-- Content -->
+      <div id="state-content" class="hidden">
+
+        <!-- Market share curves ──────────────────────────────────────── -->
+        <div class="card">
+          <div class="card-top">
+            <h2>Market Share Curves</h2>
+            <div class="tabs" id="graph-tabs">
+              <button class="tab active" data-g="copper_price">Cu Price</button>
+              <button class="tab"        data-g="aluminum_price">Al Price</button>
+              <button class="tab"        data-g="ratio">Price Ratio</button>
+            </div>
+          </div>
+          <div id="chart-main" class="chart"></div>
+          <p id="chart-caption" class="caption"></p>
+        </div>
+
+        <!-- Fit results ─────────────────────────────────────────────── -->
+        <div class="card">
+          <div class="card-top">
+            <h2>Curve Fitting Results
+              <span class="hint">
+                — ratio data, s<sub>min</sub> = 0.50, s<sub>max</sub> = 0.99
+              </span>
+            </h2>
+          </div>
+          <div class="scroll-x">
+            <table id="fit-table" class="tbl">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sanity check ────────────────────────────────────────────── -->
+        <div class="card">
+          <div class="card-top"><h2>Sanity Check</h2></div>
+          <div id="sanity-grid" class="sanity-grid"></div>
+        </div>
+
+      </div><!-- /state-content -->
+    </main>
+  </div><!-- /layout -->
+
+  <script src="app.js"></script>
+</body>
+</html>

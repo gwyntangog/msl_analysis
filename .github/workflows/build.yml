@@ -1,0 +1,35 @@
+name: Export Dashboard Data
+
+on:
+  push:
+    paths:
+      - "iter9_pdfs/**"
+      - "export_data.py"
+      - "models.py"
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pymupdf pandas numpy matplotlib \
+                      statsmodels scipy scikit-learn
+
+      - name: Run export
+        run: python export_data.py
+
+      - name: Commit generated data
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name  "GitHub Actions"
+          git add docs/data/
+          git diff --staged --quiet || git commit -m "chore: update dashboard data"
+          git push
