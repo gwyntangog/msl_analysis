@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 import pandas as pd
-from functions import tau_callibrate, tau_callibrate_row, tau_callibrate_df, ms_logit, unzero
-from functions import calc_product_cost, get_true_mins_maxes, normalize_attributes, calc_utilities
-from functions import calc_product_cost_row, normalize_product_cost_row,  calc_utility_row, point_generation_price, point_generation_ratio
+from models import tau_callibrate, tau_callibrate_row, tau_callibrate_df, ms_logit, unzero
+from models import calc_product_cost, get_true_mins_maxes, normalize_attributes, calc_utilities
+from models import calc_product_cost_row, normalize_product_cost_row,  calc_utility_row, point_generation_price, point_generation_ratio
 
 class testUnzero(unittest.TestCase):
     """Partitions
@@ -185,7 +185,7 @@ class testTauFunctions(unittest.TestCase):
 
 ######################
 
-from functions import sanity_check
+from models import sanity_check
 
 class testSanityCheck(unittest.TestCase):
     """
@@ -374,7 +374,7 @@ class testPointGenRatio(unittest.TestCase):
 # write tests for the following: point_generation_price, point_generation_ratio
 
 
-from functions import find_poly_fit, find_power_fit, find_logit_fit
+from models import find_poly_fit, find_power_fit, find_logit_fit
 import pytest
 # =============================================================================
 # find_poly_fit

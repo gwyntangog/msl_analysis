@@ -578,8 +578,11 @@ def run_through_file(filename):
     result = calc_product_cost(result)
 
     product = result["cu_product"].iloc[0]
-    sanity_df = sanity_check(result)
-    sanity_df = pd.DataFrame([sanity_df])
+
+    # ── Create output directory BEFORE any file writes ─────────────────────
+    os.makedirs(f"iter9_graphs/{product}", exist_ok=True)
+
+    sanity_df = pd.DataFrame([sanity_check(result)])
     sanity_df.to_csv(f"iter9_graphs/{product}/sanity_check.csv")
 
     result = get_true_mins_maxes(result)
@@ -591,91 +594,106 @@ def run_through_file(filename):
 
     fit_results = []
 
-
     # GRAPHING
     regions_list = result["region"].tolist()
     for region in regions_list:
-        x = np.arange(0.1,20, 0.1)
-        y = point_generation_price(result,region, price_range = x, variable = "cu")
-        generate_graph(result, region, 1000*x, y, xlabel ="Copper Price (dollars per tonne)", material = "cu")
-        y = point_generation_price(result,region, price_range = x, variable = "al")
-        generate_graph(result, region, 1000*x, y, xlabel ="Aluminum Price (dollars per tonne)", material = "al")
-        x = np.arange(2,20,0.1)
-        y = point_generation_ratio(result,region, ratio_range = x)
-        generate_graph(result, region, x, y, xlabel ="Ratio of Copper Price to Aluminum Price")
-        fit_results.append({"region":region}|try_all_fits(x,y, s_min = 0.50, s_max = 0.99))
-    x = np.arange(0.1,20, 0.1)
-    generate_master_graph(result, x, xlabel ="Copper Price (dollars per tonne)", material = "cu" )
-    generate_master_graph(result, x,  xlabel ="Aluminum Price (dollars per tonne)", material = "al" )
-    x = np.arange(2,20,0.1)
-    generate_master_graph(result, x,  xlabel ="Ratio of Copper Price to Aluminum Price", material = None )
+        x = np.arange(0.1, 20, 0.1)
+        y = point_generation_price(result, region, price_range=x, variable="cu")
+        generate_graph(result, region, 1000 * x, y,
+                       xlabel="Copper Price (dollars per tonne)", material="cu")
+        y = point_generation_price(result, region, price_range=x, variable="al")
+        generate_graph(result, region, 1000 * x, y,
+                       xlabel="Aluminum Price (dollars per tonne)", material="al")
+        x = np.arange(2, 20, 0.1)
+        y = point_generation_ratio(result, region, ratio_range=x)
+        generate_graph(result, region, x, y,
+                       xlabel="Ratio of Copper Price to Aluminum Price")
+        fit_results.append(
+            {"region": region} | try_all_fits(x, y, s_min=0.50, s_max=0.99)
+        )
+
+    x = np.arange(0.1, 20, 0.1)
+    generate_master_graph(result, x,
+                          xlabel="Copper Price (dollars per tonne)", material="cu")
+    generate_master_graph(result, x,
+                          xlabel="Aluminum Price (dollars per tonne)", material="al")
+    x = np.arange(2, 20, 0.1)
+    generate_master_graph(result, x,
+                          xlabel="Ratio of Copper Price to Aluminum Price",
+                          material=None)
 
     fit_results = pd.DataFrame(fit_results)
     fit_results.to_csv(f"iter9_graphs/{product}/fit_results.csv", index=False)
-    return
 
 
-####################### TESTING
-
-# print(find_fit('iter9_pdfs/wire_harness.pdf'))
-# run_through_file('iter9_pdfs/interconnect.pdf')
-# run_through_file('iter9_pdfs/busbar.pdf')
-# run_through_file('iter9_pdfs/motor_winding.pdf')
-# run_through_file('iter9_pdfs/wire_harness.pdf')
-# run_through_file('iter9_pdfs/ice_busbar.pdf')
-run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-# run_through_file('iter9_pdfs/ice_alternator.pdf')
-# plot all the fits
-
-result = pd.read_csv("fit_results.csv")
-print(result.columns)
-
-# LINEAR FIT
-for index, row in result.iterrows():
-    region = row["region"]
-    a = row["poly_a"]
-    b = row["poly_b"]
-    def f(x):
-        return a + b*x
-    x = np.arange(2,6,0.1)
-    y = f(x)
-    plt.ylim(-0.05, 1.05)
-    plt.plot(x,y)
-    plt.title("Linear Fit")
-plt.savefig("linear fit")
-plt.clf()
-
-# POWER FIT
-for index, row in result.iterrows():
-    region = row["region"]
-    a = row["power_alpha"]
-    b = row["power_beta"]
-    def f(x):
-        return a*(x**b)
-    x = np.arange(2,6,0.1)
-    y = f(x)
-    plt.ylim(-0.05, 1.05)
-    plt.plot(x,y)
-    plt.title("Power Fit")
-plt.savefig("power fit")
-plt.clf()
-
-# LOGIT FIT
-for index, row in result.iterrows():
-    region = row["region"]
-    a = row["logit_alpha"]
-    b = row["logit_beta"]
-    x = np.arange(2,6,0.1)
-    s_min = 0.5
-    s_max = 0.99
-    y = s_min + (s_max - s_min) / (1 + np.exp(a * (x - b)))
-    plt.ylim(-0.05, 1.05)
-    plt.plot(x,y)
-    plt.title("Logit Fit")
-plt.savefig("logit fit")
-plt.clf()
 
 
+# ── Everything below this line was previously at module level ──────────────
+if __name__ == "__main__":
+
+    ####################### TESTING
+
+    # print(find_fit('iter9_pdfs/wire_harness.pdf'))
+    # run_through_file('iter9_pdfs/interconnect.pdf')
+    # run_through_file('iter9_pdfs/busbar.pdf')
+    # run_through_file('iter9_pdfs/motor_winding.pdf')
+    # run_through_file('iter9_pdfs/wire_harness.pdf')
+    # run_through_file('iter9_pdfs/ice_busbar.pdf')
+    run_through_file('iter9_pdfs/ice_wire_harness.pdf')
+    # run_through_file('iter9_pdfs/ice_alternator.pdf')
+    # plot all the fits
+
+    result = pd.read_csv("fit_results.csv")
+    print(result.columns)
+
+    # LINEAR FIT
+    for index, row in result.iterrows():
+        region = row["region"]
+        a = row["poly_a"]
+        b = row["poly_b"]
+        def f(x):
+            return a + b * x
+        x = np.arange(2, 6, 0.1)
+        y = f(x)
+        plt.ylim(-0.05, 1.05)
+        plt.plot(x, y)
+        plt.title("Linear Fit")
+    plt.savefig("linear fit")
+    plt.clf()
+
+    # POWER FIT
+    for index, row in result.iterrows():
+        region = row["region"]
+        a = row["power_alpha"]
+        b = row["power_beta"]
+        def f(x):
+            return a * (x ** b)
+        x = np.arange(2, 6, 0.1)
+        y = f(x)
+        plt.ylim(-0.05, 1.05)
+        plt.plot(x, y)
+        plt.title("Power Fit")
+    plt.savefig("power fit")
+    plt.clf()
+
+    # LOGIT FIT
+    for index, row in result.iterrows():
+        region = row["region"]
+        a = row["logit_alpha"]
+        b = row["logit_beta"]
+        x = np.arange(2, 6, 0.1)
+        s_min = 0.5
+        s_max = 0.99
+        y = s_min + (s_max - s_min) / (1 + np.exp(a * (x - b)))
+        plt.ylim(-0.05, 1.05)
+        plt.plot(x, y)
+        plt.title("Logit Fit")
+    plt.savefig("logit fit")
+    plt.clf()
+
+    # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
+    # run_through_file('iter9_pdfs/wire_harness.pdf')
+    # etc.
 
 
 # folder_path = Path("iter9_pdfs")
