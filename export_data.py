@@ -54,13 +54,11 @@ def export_product(pdf_path, output_dir="docs/data"):
     product = df["cu_product"].iloc[0]
     regions = df["region"].tolist()
 
-    # ── Graph point series ─────────────────────────────────────────────────
+    # ── Pre-computed graph series ──────────────────────────────────────────
     graphs = {"copper_price": {}, "aluminum_price": {}, "ratio": {}}
-
     for region in regions:
         row = df[df["region"] == region].iloc[0]
 
-        # Copper price sweep
         y_cu = point_generation_price(df, region, price_range=PRICE_RANGE, variable="cu")
         graphs["copper_price"][region] = {
             "x": (PRICE_RANGE * 1000).tolist(),
@@ -69,7 +67,6 @@ def export_product(pdf_path, output_dir="docs/data"):
             "observed_y": float(row.get("copper_product_market_share", 0.5)),
         }
 
-        # Aluminum price sweep
         y_al = point_generation_price(df, region, price_range=PRICE_RANGE, variable="al")
         graphs["aluminum_price"][region] = {
             "x": (PRICE_RANGE * 1000).tolist(),
@@ -78,14 +75,13 @@ def export_product(pdf_path, output_dir="docs/data"):
             "observed_y": float(row.get("copper_product_market_share", 0.5)),
         }
 
-        # Price-ratio sweep
         y_ratio = point_generation_ratio(df, region, ratio_range=FIT_RATIO_RANGE)
         graphs["ratio"][region] = {
             "x": FIT_RATIO_RANGE.tolist(),
             "y": [float(v) for v in y_ratio],
         }
 
-    # ── Curve fits (on ratio data) ─────────────────────────────────────────
+    # ── Curve fits ─────────────────────────────────────────────────────────
     fit_results = []
     for region in regions:
         y_fit = point_generation_ratio(df, region, ratio_range=FIT_RATIO_RANGE)
@@ -97,14 +93,70 @@ def export_product(pdf_path, output_dir="docs/data"):
     # ── Sanity check ───────────────────────────────────────────────────────
     sanity = sanity_check(df)
 
-    # ── Bundle and write ───────────────────────────────────────────────────
+    # ── Region parameters for live client-side computation ─────────────────
+    # These mirror exactly what calc_utility_row / ms_logit need
+    def sf(val, default=0.0):
+        """Safe float — returns default for NaN/inf/missing."""
+        try:
+            v = float(val)
+            return default if not np.isfinite(v) else v
+        except (TypeError, ValueError):
+            return default
+
+    region_params = {}
+    for _, row in df.iterrows():
+        r = str(row["region"])
+        p = {}
+
+        # Observed prices ($/kg) and market share
+        p["copper_price_per_kg"]          = sf(row.get("copper_price_per_kg"))
+        p["aluminum_price_per_kg"]        = sf(row.get("aluminum_price_per_kg"))
+        p["copper_product_market_share"]  = sf(row.get("copper_product_market_share"), 0.5)
+        p["tau_value"]                    = sf(row.get("tau_value"), 1.0)
+
+        # Product cost components (per material)
+        for m in ["cu", "al"]:
+            p[f"{m}_non_material_cost_per_unit"] = sf(row.get(f"{m}_non_material_cost_per_unit"))
+            p[f"{m}_copper_kg"]                  = sf(row.get(f"{m}_copper_kg"))
+            p[f"{m}_aluminum_kg"]                = sf(row.get(f"{m}_aluminum_kg"))
+
+        # Attribute 1 (cost) normalisation bounds
+        p["attribute_1_min"] = sf(row.get("attribute_1_min"), 0.0)
+        p["attribute_1_max"] = sf(row.get("attribute_1_max"), 1.0)
+
+        # Attributes 2–5 are pre-calibrated and don't change with price
+        for i in range(2, 6):
+            for m in ["cu", "al"]:
+                p[f"{m}_a{i}_callibrated"] = sf(row.get(f"{m}_a{i}_callibrated"))
+
+        # Attribute weights
+        for i in range(1, 6):
+            p[f"weight_attribute_{i}"] = sf(row.get(f"weight_attribute_{i}"))
+
+        region_params[r] = p
+
+    # ── Slider defaults and ranges ($/tonne) ───────────────────────────────
+    cu_kg = [p["copper_price_per_kg"]   for p in region_params.values() if p["copper_price_per_kg"]   > 0]
+    al_kg = [p["aluminum_price_per_kg"] for p in region_params.values() if p["aluminum_price_per_kg"] > 0]
+
+    price_meta = {
+        "cu_default": round(float(np.mean(cu_kg)) * 1000) if cu_kg else 8000,
+        "al_default": round(float(np.mean(al_kg)) * 1000) if al_kg else 2500,
+        "cu_min": 100,   "al_min": 100,
+        "cu_max": 20000, "al_max": 20000,
+        "cu_step": 100,  "al_step": 50,
+    }
+
+    # ── Write JSON ─────────────────────────────────────────────────────────
     payload = {
-        "product":     product,
-        "regions":     regions,
-        "graphs":      graphs,
-        "fit_results": fit_results,
-        "fit_bounds":  {"s_min": FIT_S_MIN, "s_max": FIT_S_MAX},
-        "sanity_check": sanity,
+        "product":        product,
+        "regions":        regions,
+        "graphs":         graphs,
+        "fit_results":    fit_results,
+        "fit_bounds":     {"s_min": FIT_S_MIN, "s_max": FIT_S_MAX},
+        "sanity_check":   sanity,
+        "region_params":  region_params,
+        "price_meta":     price_meta,
     }
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)

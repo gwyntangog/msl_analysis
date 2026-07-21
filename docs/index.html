@@ -86,6 +86,50 @@
           <p id="chart-caption" class="caption"></p>
         </div>
 
+        <!-- Price Explorer ──────────────────────────────────────────────────────── -->
+<div class="card" id="card-explorer">
+  <div class="card-top">
+    <h2>Price Explorer
+      <span class="hint">— adjust both prices and see market shares update live</span>
+    </h2>
+    <button class="btn-xs" id="btn-reset-prices">↺ Reset to baseline</button>
+  </div>
+
+  <div class="price-controls">
+
+    <!-- Copper -->
+    <div class="price-control">
+      <div class="price-label-row">
+        <span class="material-badge cu-badge">Cu</span>
+        <span class="price-name">Copper Price</span>
+        <span class="price-unit">$/tonne</span>
+        <span class="price-obs-note" id="note-cu"></span>
+      </div>
+      <div class="slider-row">
+        <input type="range"  id="slider-cu" class="price-slider cu-slider" />
+        <input type="number" id="input-cu"  class="price-input" />
+      </div>
+    </div>
+
+    <!-- Aluminum -->
+    <div class="price-control">
+      <div class="price-label-row">
+        <span class="material-badge al-badge">Al</span>
+        <span class="price-name">Aluminum Price</span>
+        <span class="price-unit">$/tonne</span>
+        <span class="price-obs-note" id="note-al"></span>
+      </div>
+      <div class="slider-row">
+        <input type="range"  id="slider-al" class="price-slider al-slider" />
+        <input type="number" id="input-al"  class="price-input" />
+      </div>
+    </div>
+
+  </div><!-- /price-controls -->
+
+  <div id="chart-explorer" class="chart chart-explorer"></div>
+</div>
+
         <!-- Fit results ─────────────────────────────────────────────── -->
         <div class="card">
           <div class="card-top">
