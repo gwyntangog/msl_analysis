@@ -1,6 +1,3 @@
-/* app.js ─────────────────────────────────────────────────────────────────────
- * Material Substitution Model — interactive dashboard
- * ─────────────────────────────────────────────────────────────────────────── */
 "use strict";
 
 // ── Palette & constants ────────────────────────────────────────────────────
@@ -22,7 +19,7 @@ const S = {
   selRegions:   new Set(),
   showObserved: true,
   showFits:     false,
-  cuPrice:      null,   // $/tonne  (model internally uses $/kg = this / 1000)
+  cuPrice:      null,   // $/tonne
   alPrice:      null,
 };
 
@@ -42,8 +39,7 @@ async function fetchJSON(url) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  JS MODEL  (mirrors Python: calc_product_cost_row → normalize → calc_utility_row → ms_logit)
-//  All price arguments are in $/kg (the model's native unit).
+//  JS MODEL  (mirrors Python utility / logit functions)
 // ═══════════════════════════════════════════════════════════════════════════
 
 function productCostJS(p, cuKg, alKg, material) {
@@ -56,7 +52,7 @@ function normCostJS(p, cost) {
   const hi = p.attribute_1_max ?? 1;
   const lo = p.attribute_1_min ?? 0;
   if (hi === lo) return 0;
-  return (hi - cost) / (hi - lo);   // negative direction: lower cost → higher score
+  return (hi - cost) / (hi - lo);
 }
 
 function utilityJS(p, cuKg, alKg, material, n = 5) {
@@ -69,7 +65,6 @@ function utilityJS(p, cuKg, alKg, material, n = 5) {
   return u;
 }
 
-// Numerically stable logit (avoids overflow for large utility differences)
 function logitMS(cuU, alU, tau) {
   if (!isFinite(tau) || tau === 0) return 0.5;
   const d = (cuU - alU) / tau;
@@ -87,15 +82,55 @@ function marketShareJS(p, cuKg, alKg) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  PRICE EXPLORER
+//  LIVE CURVE COMPUTATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-let _priceListenersReady = false;
+/** Generates an evenly-spaced array from start to stop (inclusive) by step. */
+function linspace(start, stop, step) {
+  const arr = [];
+  for (let v = start; v <= stop + step * 1e-9; v += step)
+    arr.push(Math.round(v * 1e6) / 1e6);
+  return arr;
+}
 
-/** Wire up the slider ↔ number-input ↔ state sync (runs once). */
+// X-axis domains — mirror the ranges used in export_data.py
+const X_RANGES = {
+  copper_price:   linspace(100, 20000, 100),   // $/tonne
+  aluminum_price: linspace(100, 20000, 50),    // $/tonne
+  ratio:          linspace(2.0, 20.0,  0.1),   // dimensionless
+};
+
+/**
+ * Given region params and current prices ($/tonne), return a y-array of
+ * market shares over the full x-range for the chosen graph type.
+ *
+ * copper_price tab  → sweep Cu price, hold Al price from slider
+ * aluminum_price tab → sweep Al price, hold Cu price from slider
+ * ratio tab         → sweep ratio = Cu/Al, hold Al price from slider
+ */
+function computeCurve(p, gType, cuPrice, alPrice) {
+  const cuKg = cuPrice / 1000;
+  const alKg = alPrice / 1000;
+
+  return X_RANGES[gType].map(x => {
+    let ms;
+    if      (gType === "copper_price")   ms = marketShareJS(p, x / 1000, alKg);
+    else if (gType === "aluminum_price") ms = marketShareJS(p, cuKg, x / 1000);
+    else /* ratio */                     ms = marketShareJS(p, alKg * x, alKg);
+
+    return isFinite(ms) ? Math.max(0, Math.min(1, ms)) : 0.5;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PRICE EXPLORER  (bar chart)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _listenersReady = false;
+
 function setupPriceListeners() {
-  if (_priceListenersReady) return;
-  _priceListenersReady = true;
+  if (_listenersReady) return;
+  _listenersReady = true;
 
   const sCu = $("slider-cu"), iCu = $("input-cu");
   const sAl = $("slider-al"), iAl = $("input-al");
@@ -106,26 +141,26 @@ function setupPriceListeners() {
                     Math.min(pm[`${mat}_max`] ?? 30000, v));
   }
 
-  function setCu(v) { S.cuPrice = v; renderExplorer(); renderChart(); }
-  function setAl(v) { S.alPrice = v; renderExplorer(); renderChart(); }
+  // Both renderExplorer and renderChart update together on every price change
+  function setCu(v) { S.cuPrice = v; renderChart(); renderExplorer(); }
+  function setAl(v) { S.alPrice = v; renderChart(); renderExplorer(); }
 
-  sCu.addEventListener("input",  () => { iCu.value = sCu.value;            setCu(+sCu.value); });
-  iCu.addEventListener("change", () => { const v = clamp(+iCu.value,"cu"); sCu.value = iCu.value = v; setCu(v); });
+  sCu.addEventListener("input",  () => { iCu.value = sCu.value;             setCu(+sCu.value); });
+  iCu.addEventListener("change", () => { const v=clamp(+iCu.value,"cu"); sCu.value=iCu.value=v; setCu(v); });
 
-  sAl.addEventListener("input",  () => { iAl.value = sAl.value;            setAl(+sAl.value); });
-  iAl.addEventListener("change", () => { const v = clamp(+iAl.value,"al"); sAl.value = iAl.value = v; setAl(v); });
+  sAl.addEventListener("input",  () => { iAl.value = sAl.value;             setAl(+sAl.value); });
+  iAl.addEventListener("change", () => { const v=clamp(+iAl.value,"al"); sAl.value=iAl.value=v; setAl(v); });
 
   $("btn-reset-prices").addEventListener("click", () => {
     const pm = S.data?.price_meta;
     if (!pm) return;
     sCu.value = iCu.value = S.cuPrice = pm.cu_default;
     sAl.value = iAl.value = S.alPrice = pm.al_default;
-    renderExplorer();
     renderChart();
+    renderExplorer();
   });
 }
 
-/** Called on every product load — resets slider bounds, defaults, and notes. */
 function initPriceExplorer() {
   setupPriceListeners();
 
@@ -133,7 +168,6 @@ function initPriceExplorer() {
   const sCu = $("slider-cu"), iCu = $("input-cu");
   const sAl = $("slider-al"), iAl = $("input-al");
 
-  // Apply slider config for this product
   for (const el of [sCu, iCu]) {
     el.min = pm.cu_min; el.max = pm.cu_max; el.step = pm.cu_step;
   }
@@ -141,28 +175,23 @@ function initPriceExplorer() {
     el.min = pm.al_min; el.max = pm.al_max; el.step = pm.al_step;
   }
 
-  // Reset to defaults
-  sCu.value = iCu.value = S.cuPrice = pm.cu_default;
-  sAl.value = iAl.value = S.alPrice = pm.al_default;
+  // Sync sliders to prices already set in loadProduct
+  sCu.value = iCu.value = S.cuPrice;
+  sAl.value = iAl.value = S.alPrice;
 
   // Observed average annotation
   const rp = S.data.region_params ?? {};
   const mean = arr => arr.length
-    ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+    ? Math.round(arr.reduce((a,b) => a+b, 0) / arr.length)
     : null;
-
-  const cuObs = mean(Object.values(rp)
-    .map(p => p.copper_price_per_kg * 1000).filter(Boolean));
-  const alObs = mean(Object.values(rp)
-    .map(p => p.aluminum_price_per_kg * 1000).filter(Boolean));
-
+  const cuObs = mean(Object.values(rp).map(p => p.copper_price_per_kg   * 1000).filter(Boolean));
+  const alObs = mean(Object.values(rp).map(p => p.aluminum_price_per_kg * 1000).filter(Boolean));
   $("note-cu").textContent = cuObs ? `avg observed: $${cuObs.toLocaleString()}/t` : "";
   $("note-al").textContent = alObs ? `avg observed: $${alObs.toLocaleString()}/t` : "";
 
   renderExplorer();
 }
 
-/** Renders the bar chart in the Price Explorer card. */
 function renderExplorer() {
   if (!S.data?.region_params || S.cuPrice == null) return;
 
@@ -183,21 +212,17 @@ function renderExplorer() {
   const traces = [
     {
       type: "bar",
-      x: regions,
-      y: computed,
+      x: regions, y: computed,
       name: label,
       marker: { color: colors, opacity: 0.82 },
       hovertemplate: "<b>%{x}</b><br>Market share: <b>%{y:.3f}</b><extra></extra>",
     },
     {
-      type: "scatter",
-      mode: "markers",
-      x: regions,
-      y: observed,
+      type: "scatter", mode: "markers",
+      x: regions, y: observed,
       name: "Observed baseline",
       marker: {
-        symbol: "diamond",
-        size: 12,
+        symbol: "diamond", size: 12,
         color: "rgba(0,0,0,0)",
         line: { color: "#94a3b8", width: 2 },
       },
@@ -210,18 +235,14 @@ function renderExplorer() {
     plot_bgcolor:  "rgba(0,0,0,0)",
     font: { color: "#e2e8f0", family: "Inter, sans-serif", size: 12 },
     xaxis: {
-      color: "#94a3b8",
-      gridcolor: "rgba(0,0,0,0)",
+      color: "#94a3b8", gridcolor: "rgba(0,0,0,0)",
       tickangle: regions.length > 5 ? -30 : 0,
     },
     yaxis: {
       title: { text: "Cu Market Share", standoff: 8 },
       range: [-0.05, 1.1],
-      gridcolor: "#1a1f35",
-      zerolinecolor: "#1a1f35",
-      color: "#94a3b8",
+      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
     },
-    // 50 % reference line
     shapes: [{
       type: "line",
       x0: -0.5, x1: Math.max(0, regions.length - 0.5),
@@ -230,21 +251,166 @@ function renderExplorer() {
       line: { color: "#334155", width: 1.2, dash: "dot" },
     }],
     legend: {
-      bgcolor: "rgba(0,0,0,0)",
-      bordercolor: "#252d48",
-      font: { size: 10 },
-      orientation: "h",
-      y: -0.32,
+      bgcolor: "rgba(0,0,0,0)", bordercolor: "#252d48",
+      font: { size: 10 }, orientation: "h", y: -0.32,
     },
-    bargap:    0.38,
-    margin:    { t: 10, r: 18, b: 85, l: 55 },
+    bargap: 0.38,
+    margin: { t: 10, r: 18, b: 85, l: 55 },
     hovermode: "closest",
   };
 
   Plotly.react("chart-explorer", traces, layout, {
-    responsive: true,
-    displayModeBar: false,
+    responsive: true, displayModeBar: false,
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MAIN CHART  — curves computed live from slider prices
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderChart() {
+  if (!S.data || S.cuPrice == null || S.alPrice == null) return;
+
+  const gType   = S.graphType;
+  const labels  = AXES[gType];
+  const regions = S.data.regions.filter(r => S.selRegions.has(r));
+  const rp      = S.data.region_params ?? {};
+  const traces  = [];
+  const xs      = X_RANGES[gType];
+
+  // ── Live curves ────────────────────────────────────────────────────────
+  regions.forEach(r => {
+    const p = rp[r];
+    if (!p) return;
+    const c  = colorFor(r);
+
+    // Recompute curve at current slider prices
+    const ys = computeCurve(p, gType, S.cuPrice, S.alPrice);
+
+    traces.push({
+      x: xs, y: ys,
+      type: "scatter", mode: "lines", name: r,
+      line: { color: c, width: 2.2 },
+      hovertemplate:
+        `<b>${r}</b><br>${labels.x}: %{x:.2f}<br>${labels.y}: %{y:.3f}<extra></extra>`,
+    });
+
+    // ── Observed point ──────────────────────────────────────────────────
+    if (S.showObserved) {
+      let obsX;
+      if      (gType === "copper_price")   obsX = p.copper_price_per_kg   * 1000;
+      else if (gType === "aluminum_price") obsX = p.aluminum_price_per_kg * 1000;
+      else /* ratio */                     obsX = p.aluminum_price_per_kg > 0
+        ? p.copper_price_per_kg / p.aluminum_price_per_kg
+        : null;
+
+      if (obsX != null) {
+        traces.push({
+          x: [obsX], y: [p.copper_product_market_share],
+          type: "scatter", mode: "markers",
+          name: `${r} (obs)`, showlegend: false,
+          marker: { color: c, size: 9, symbol: "circle",
+                    line: { color: "#fff", width: 1.5 } },
+          hovertemplate:
+            `<b>${r} — observed</b><br>${labels.x}: %{x:.2f}<br>` +
+            `${labels.y}: %{y:.3f}<extra></extra>`,
+        });
+      }
+    }
+  });
+
+  // ── Fit overlays (ratio tab only) ──────────────────────────────────────
+  if (S.showFits && gType === "ratio") {
+    const { s_min, s_max } = S.data.fit_bounds;
+    regions.forEach(r => {
+      const fit = S.data.fit_results.find(f => f.region === r);
+      if (!fit) return;
+      const c = colorFor(r);
+
+      if (fit.poly_a != null)
+        traces.push({ x: xs, y: xs.map(x => fit.poly_a + fit.poly_b * x),
+          type:"scatter", mode:"lines", showlegend:false, name:`${r} linear`,
+          line:{ color:c, width:1.2, dash:"dot" },
+          hovertemplate:`<b>${r} linear</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
+
+      if (fit.power_alpha != null)
+        traces.push({ x: xs, y: xs.map(x => fit.power_alpha * Math.exp(fit.power_beta * x)),
+          type:"scatter", mode:"lines", showlegend:false, name:`${r} exp`,
+          line:{ color:c, width:1.2, dash:"dash" },
+          hovertemplate:`<b>${r} exp</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
+
+      if (fit.logit_alpha != null)
+        traces.push({ x: xs,
+          y: xs.map(x => s_min + (s_max-s_min) / (1 + Math.exp(fit.logit_alpha*(x-fit.logit_beta)))),
+          type:"scatter", mode:"lines", showlegend:false, name:`${r} logit`,
+          line:{ color:c, width:1.2, dash:"longdash" },
+          hovertemplate:`<b>${r} logit</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
+    });
+  }
+
+  // ── Vertical indicator for current price/ratio ─────────────────────────
+  const shapes = [], annots = [];
+
+  const addIndicator = (xVal, color, label) => {
+    shapes.push({
+      type: "line",
+      x0: xVal, x1: xVal, y0: 0, y1: 1, yref: "paper",
+      line: { color, width: 1.5, dash: "dot" },
+    });
+    annots.push({
+      x: xVal, y: 1.04, yref: "paper",
+      text: label, showarrow: false,
+      font: { size: 9.5, color },
+      xanchor: "center",
+      bgcolor: "rgba(11,14,24,.85)",
+      borderpad: 2,
+    });
+  };
+
+  if (gType === "copper_price")
+    addIndicator(S.cuPrice, "#f59e0b", `Cu $${S.cuPrice.toLocaleString()}/t`);
+
+  if (gType === "aluminum_price")
+    addIndicator(S.alPrice, "#818cf8", `Al $${S.alPrice.toLocaleString()}/t`);
+
+  if (gType === "ratio" && S.alPrice > 0)
+    addIndicator(
+      +(S.cuPrice / S.alPrice).toFixed(3),
+      "#94a3b8",
+      `${(S.cuPrice / S.alPrice).toFixed(2)}×`
+    );
+
+  // ── Layout ────────────────────────────────────────────────────────────
+  const layout = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor:  "rgba(0,0,0,0)",
+    font:   { color: "#e2e8f0", family: "Inter, sans-serif", size: 12 },
+    xaxis:  {
+      title: { text: labels.x, standoff: 8 },
+      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
+    },
+    yaxis:  {
+      title: { text: labels.y, standoff: 8 },
+      range: [-0.05, 1.05],
+      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
+    },
+    shapes, annotations: annots,
+    legend: {
+      bgcolor: "rgba(0,0,0,0)", bordercolor: "#252d48", font: { size: 11 },
+    },
+    margin:    { t: 28, r: 18, b: 52, l: 60 },
+    hovermode: "closest",
+  };
+
+  Plotly.react("chart-main", traces, layout, {
+    responsive: true,
+    displayModeBar: true,
+    modeBarButtonsToRemove: ["lasso2d","select2d","autoScale2d"],
+    displaylogo: false,
+  });
+
+  $("chart-caption").textContent =
+    `${cap(S.data.product)}  ·  showing ${regions.length} / ${S.data.regions.length} regions`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -271,7 +437,7 @@ function buildProductButtons(products) {
   const el = $("product-selector");
   el.innerHTML = "";
   products.forEach(p => {
-    const btn = document.createElement("button");
+    const btn       = document.createElement("button");
     btn.className   = "prod-btn";
     btn.textContent = cap(p);
     btn.dataset.p   = p;
@@ -288,6 +454,12 @@ async function loadProduct(product) {
   try {
     S.data       = await fetchJSON(`data/${product}.json`);
     S.selRegions = new Set(S.data.regions);
+
+    // Set prices BEFORE renderAll so computeCurve has values to work with
+    const pm = S.data.price_meta;
+    S.cuPrice = pm.cu_default;
+    S.alPrice = pm.al_default;
+
     buildRegionList(S.data.regions);
     $("header-subtitle").textContent =
       `${cap(product)}  ·  ${S.data.regions.length} regions`;
@@ -306,7 +478,7 @@ function buildRegionList(regions) {
   const el = $("region-list");
   el.innerHTML = "";
   regions.forEach(r => {
-    const label = document.createElement("label");
+    const label     = document.createElement("label");
     label.className = "reg-item";
     label.innerHTML = `
       <input type="checkbox" value="${r}" checked />
@@ -327,141 +499,7 @@ function renderAll() {
   renderSanity();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  MAIN PRICE SWEEP CHART  (with sliding vertical price indicator)
-// ═══════════════════════════════════════════════════════════════════════════
-
-function renderChart() {
-  if (!S.data) return;
-
-  const gType   = S.graphType;
-  const gData   = S.data.graphs[gType];
-  const labels  = AXES[gType];
-  const regions = S.data.regions.filter(r => S.selRegions.has(r));
-  const traces  = [];
-
-  // ── Model curves ──────────────────────────────────────────────────────
-  regions.forEach(r => {
-    const d = gData[r];
-    const c = colorFor(r);
-
-    traces.push({
-      x: d.x, y: d.y,
-      type: "scatter", mode: "lines", name: r,
-      line: { color: c, width: 2.2 },
-      hovertemplate:
-        `<b>${r}</b><br>${labels.x}: %{x:.1f}<br>${labels.y}: %{y:.3f}<extra></extra>`,
-    });
-
-    if (S.showObserved && d.observed_x != null) {
-      traces.push({
-        x: [d.observed_x], y: [d.observed_y],
-        type: "scatter", mode: "markers",
-        name: `${r} (obs)`, showlegend: false,
-        marker: { color: c, size: 9, symbol: "circle",
-                  line: { color: "#fff", width: 1.5 } },
-        hovertemplate:
-          `<b>${r} — observed</b><br>${labels.x}: %{x:.1f}<br>` +
-          `${labels.y}: %{y:.3f}<extra></extra>`,
-      });
-    }
-  });
-
-  // ── Fit overlays (ratio tab only) ──────────────────────────────────────
-  if (S.showFits && gType === "ratio") {
-    const { s_min, s_max } = S.data.fit_bounds;
-    regions.forEach(r => {
-      const fit = S.data.fit_results.find(f => f.region === r);
-      if (!fit) return;
-      const xs = gData[r].x;
-      const c  = colorFor(r);
-
-      if (fit.poly_a != null)
-        traces.push({ x: xs, y: xs.map(x => fit.poly_a + fit.poly_b * x),
-          type: "scatter", mode: "lines", showlegend: false,
-          name: `${r} linear`, line: { color: c, width: 1.2, dash: "dot" },
-          hovertemplate: `<b>${r} linear</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
-
-      if (fit.power_alpha != null)
-        traces.push({ x: xs, y: xs.map(x => fit.power_alpha * Math.exp(fit.power_beta * x)),
-          type: "scatter", mode: "lines", showlegend: false,
-          name: `${r} exp`, line: { color: c, width: 1.2, dash: "dash" },
-          hovertemplate: `<b>${r} exp</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
-
-      if (fit.logit_alpha != null)
-        traces.push({ x: xs, y: xs.map(x =>
-          s_min + (s_max - s_min) / (1 + Math.exp(fit.logit_alpha * (x - fit.logit_beta)))),
-          type: "scatter", mode: "lines", showlegend: false,
-          name: `${r} logit`, line: { color: c, width: 1.2, dash: "longdash" },
-          hovertemplate: `<b>${r} logit</b><br>%{x:.2f}: %{y:.3f}<extra></extra>` });
-    });
-  }
-
-  // ── Vertical price indicator from slider ──────────────────────────────
-  const shapes = [], annots = [];
-
-  const addIndicator = (price, color, label) => {
-    shapes.push({
-      type: "line",
-      x0: price, x1: price, y0: 0, y1: 1, yref: "paper",
-      line: { color, width: 1.5, dash: "dot" },
-    });
-    annots.push({
-      x: price, y: 1.04, yref: "paper",
-      text: label,
-      showarrow: false,
-      font: { size: 9.5, color },
-      xanchor: "center",
-      bgcolor: "rgba(11,14,24,.8)",
-      borderpad: 2,
-    });
-  };
-
-  if (gType === "copper_price"   && S.cuPrice != null)
-    addIndicator(S.cuPrice, "#f59e0b", `Cu $${S.cuPrice.toLocaleString()}/t`);
-  if (gType === "aluminum_price" && S.alPrice != null)
-    addIndicator(S.alPrice, "#818cf8", `Al $${S.alPrice.toLocaleString()}/t`);
-
-  // ── Layout ────────────────────────────────────────────────────────────
-  const layout = {
-    paper_bgcolor: "rgba(0,0,0,0)",
-    plot_bgcolor:  "rgba(0,0,0,0)",
-    font:   { color: "#e2e8f0", family: "Inter, sans-serif", size: 12 },
-    xaxis:  {
-      title: { text: labels.x, standoff: 8 },
-      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
-    },
-    yaxis:  {
-      title: { text: labels.y, standoff: 8 },
-      range: [-0.05, 1.05],
-      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
-    },
-    shapes,
-    annotations: annots,
-    legend: {
-      bgcolor: "rgba(0,0,0,0)",
-      bordercolor: "#252d48",
-      font: { size: 11 },
-    },
-    margin:    { t: 28, r: 18, b: 52, l: 60 },
-    hovermode: "closest",
-  };
-
-  Plotly.react("chart-main", traces, layout, {
-    responsive: true,
-    displayModeBar: true,
-    modeBarButtonsToRemove: ["lasso2d","select2d","autoScale2d"],
-    displaylogo: false,
-  });
-
-  $("chart-caption").textContent =
-    `${cap(S.data.product)}  ·  showing ${regions.length} / ${S.data.regions.length} regions`;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  FIT TABLE & SANITY CHECK
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ── Fit table ──────────────────────────────────────────────────────────────
 function renderFitTable() {
   if (!S.data) return;
   document.querySelector("#fit-table thead").innerHTML = `<tr>
@@ -473,7 +511,7 @@ function renderFitTable() {
   const tbody = document.querySelector("#fit-table tbody");
   tbody.innerHTML = "";
   S.data.fit_results.forEach(row => {
-    const b = row.best;
+    const b  = row.best;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="region-cell">${row.region}</td>
@@ -491,6 +529,7 @@ function renderFitTable() {
   });
 }
 
+// ── Sanity check ───────────────────────────────────────────────────────────
 function renderSanity() {
   if (!S.data) return;
   const grid = $("sanity-grid");
@@ -505,10 +544,7 @@ function renderSanity() {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  SHARED EVENT WIRING
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ── State & events ─────────────────────────────────────────────────────────
 function showState(name) {
   ["loading","empty","content"].forEach(s =>
     $(`state-${s}`).classList.toggle("hidden", s !== name));
@@ -527,15 +563,13 @@ $("graph-tabs").addEventListener("click", e => {
 $("btn-all").addEventListener("click", () => {
   S.selRegions = new Set(S.data?.regions ?? []);
   document.querySelectorAll("#region-list input").forEach(c => c.checked = true);
-  renderChart();
-  renderExplorer();
+  renderChart(); renderExplorer();
 });
 
 $("btn-none").addEventListener("click", () => {
   S.selRegions = new Set();
   document.querySelectorAll("#region-list input").forEach(c => c.checked = false);
-  renderChart();
-  renderExplorer();
+  renderChart(); renderExplorer();
 });
 
 $("toggle-observed").addEventListener("change", e => {
