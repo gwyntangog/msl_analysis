@@ -3,26 +3,35 @@
 
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
-  --bg:         #0b0e18;
-  --bg-card:    #111520;
-  --bg-side:    #0d1019;
-  --bg-hover:   #181d2e;
+  /* Backgrounds */
+  --bg:         #f5f9fc;
+  --bg-card:    #ffffff;
+  --bg-side:    #edf4fa;
+  --bg-hover:   #e4eef8;
 
+  /* Accent colors */
   --blue:       #3b82f6;
-  --blue-dim:   rgba(59,130,246,.14);
-  --green:      #10b981;
-  --green-dim:  rgba(16,185,129,.12);
-  --amber:      #f59e0b;
-  --amber-dim:  rgba(245,158,11,.12);
-  --red:        #ef4444;
-  --red-dim:    rgba(239,68,68,.12);
+  --blue-dim:   rgba(59,130,246,.12);
 
-  --text:       #e2e8f0;
+  --green:      #10b981;
+  --green-dim:  rgba(16,185,129,.10);
+
+  --amber:      #f59e0b;
+  --amber-dim:  rgba(245,158,11,.10);
+
+  --red:        #ef4444;
+  --red-dim:    rgba(239,68,68,.10);
+
+  /* Text */
+  --text:       #1e293b;
   --muted:      #64748b;
   --faint:      #94a3b8;
-  --border:     #1a1f35;
-  --border2:    #252d48;
 
+  /* Borders */
+  --border:     #dbe5f0;
+  --border2:    #c9d7e6;
+
+  /* Radius */
   --r:  10px;
   --r2:  6px;
   --r3:  4px;
