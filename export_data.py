@@ -21,8 +21,8 @@ from models import *
 #                     try_all_fits, sanity_check)
 
 # ── Configuration ──────────────────────────────────────────────────────────
-FIT_S_MIN      = 0.50
-FIT_S_MAX      = 0.99
+FIT_S_MIN      = 0
+FIT_S_MAX      = 1
 FIT_RATIO_RANGE = np.arange(2.0, 20.0, 0.1)
 PRICE_RANGE     = np.arange(0.1, 20.0, 0.1)
 

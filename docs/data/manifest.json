@@ -1,6 +1,11 @@
 {
   "products": [
+    "EV HV DC Link Laminated Busbar",
+    "ICE Alternator Winding",
     "ICE PDC Busbar",
-    "EV Traction Motor Winding"
+    "ICE Wire Harness",
+    "EV Battery Cell-to-Cell Interconnect",
+    "EV Traction Motor Winding",
+    "EV Wire Harness"
   ]
 }

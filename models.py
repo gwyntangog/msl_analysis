@@ -507,7 +507,15 @@ def find_power_fit(x,y):
 def find_logit_fit(ratios, shares, s_min=0, s_max = 1):
     shares = np.array(shares)
     ratios = np.array(ratios)
-    print(shares)
+
+    problem_mask = (shares <= s_min) | (shares >= s_max)
+    if problem_mask.any():
+        print(f"\n[find_logit_fit] s_min={s_min}, s_max={s_max}")
+        print(f"  shares range: [{shares.min():.6f}, {shares.max():.6f}]")
+        print(f"  {problem_mask.sum()} values at or outside bounds:")
+        print(f"  {shares[problem_mask]}")
+        print(f"  at ratios: {ratios[problem_mask]}")
+    # print(shares)
     shares = np.maximum(shares, s_min)
     #### replace values in array to a new minimum
     assert np.all(shares >= s_min),  "S_c must be > S_min for log to be defined"
@@ -604,12 +612,12 @@ def run_through_file(filename):
         y = point_generation_price(result, region, price_range=x, variable="al")
         generate_graph(result, region, 1000 * x, y,
                        xlabel="Aluminum Price (dollars per tonne)", material="al")
-        x = np.arange(2, 20, 0.1)
+        x = np.arange(2, 6, 0.1)
         y = point_generation_ratio(result, region, ratio_range=x)
         generate_graph(result, region, x, y,
                        xlabel="Ratio of Copper Price to Aluminum Price")
         fit_results.append(
-            {"region": region} | try_all_fits(x, y, s_min=0.50, s_max=0.99)
+            {"region": region} | try_all_fits(x, y, s_min=0, s_max=1)
         )
 
     x = np.arange(0.1, 20, 0.1)
@@ -617,7 +625,7 @@ def run_through_file(filename):
                           xlabel="Copper Price (dollars per tonne)", material="cu")
     generate_master_graph(result, x,
                           xlabel="Aluminum Price (dollars per tonne)", material="al")
-    x = np.arange(2, 20, 0.1)
+    x = np.arange(2, 6, 0.1)
     generate_master_graph(result, x,
                           xlabel="Ratio of Copper Price to Aluminum Price",
                           material=None)
@@ -629,67 +637,68 @@ def run_through_file(filename):
 
 
 # ── Everything below this line was previously at module level ──────────────
-if __name__ == "__main__":
+# if __name__ == "__main__":
+#     return
 
     ####################### TESTING
 
-    # print(find_fit('iter9_pdfs/wire_harness.pdf'))
-    # run_through_file('iter9_pdfs/interconnect.pdf')
-    # run_through_file('iter9_pdfs/busbar.pdf')
-    # run_through_file('iter9_pdfs/motor_winding.pdf')
-    # run_through_file('iter9_pdfs/wire_harness.pdf')
-    # run_through_file('iter9_pdfs/ice_busbar.pdf')
-    run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-    # run_through_file('iter9_pdfs/ice_alternator.pdf')
-    # plot all the fits
+    # # print(find_fit('iter9_pdfs/wire_harness.pdf'))
+    # # run_through_file('iter9_pdfs/interconnect.pdf')
+    # # run_through_file('iter9_pdfs/busbar.pdf')
+    # # run_through_file('iter9_pdfs/motor_winding.pdf')
+    # # run_through_file('iter9_pdfs/wire_harness.pdf')
+    # # run_through_file('iter9_pdfs/ice_busbar.pdf')
+    # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
+    # # run_through_file('iter9_pdfs/ice_alternator.pdf')
+    # # plot all the fits
 
-    result = pd.read_csv("fit_results.csv")
-    print(result.columns)
+    # result = pd.read_csv("fit_results.csv")
+    # print(result.columns)
 
-    # LINEAR FIT
-    for index, row in result.iterrows():
-        region = row["region"]
-        a = row["poly_a"]
-        b = row["poly_b"]
-        def f(x):
-            return a + b * x
-        x = np.arange(2, 6, 0.1)
-        y = f(x)
-        plt.ylim(-0.05, 1.05)
-        plt.plot(x, y)
-        plt.title("Linear Fit")
-    plt.savefig("linear fit")
-    plt.clf()
+    # # LINEAR FIT
+    # for index, row in result.iterrows():
+    #     region = row["region"]
+    #     a = row["poly_a"]
+    #     b = row["poly_b"]
+    #     def f(x):
+    #         return a + b * x
+    #     x = np.arange(2, 6, 0.1)
+    #     y = f(x)
+    #     plt.ylim(-0.05, 1.05)
+    #     plt.plot(x, y)
+    #     plt.title("Linear Fit")
+    # plt.savefig("linear fit")
+    # plt.clf()
 
-    # POWER FIT
-    for index, row in result.iterrows():
-        region = row["region"]
-        a = row["power_alpha"]
-        b = row["power_beta"]
-        def f(x):
-            return a * (x ** b)
-        x = np.arange(2, 6, 0.1)
-        y = f(x)
-        plt.ylim(-0.05, 1.05)
-        plt.plot(x, y)
-        plt.title("Power Fit")
-    plt.savefig("power fit")
-    plt.clf()
+    # # POWER FIT
+    # for index, row in result.iterrows():
+    #     region = row["region"]
+    #     a = row["power_alpha"]
+    #     b = row["power_beta"]
+    #     def f(x):
+    #         return a * (x ** b)
+    #     x = np.arange(2, 6, 0.1)
+    #     y = f(x)
+    #     plt.ylim(-0.05, 1.05)
+    #     plt.plot(x, y)
+    #     plt.title("Power Fit")
+    # plt.savefig("power fit")
+    # plt.clf()
 
-    # LOGIT FIT
-    for index, row in result.iterrows():
-        region = row["region"]
-        a = row["logit_alpha"]
-        b = row["logit_beta"]
-        x = np.arange(2, 6, 0.1)
-        s_min = 0.5
-        s_max = 0.99
-        y = s_min + (s_max - s_min) / (1 + np.exp(a * (x - b)))
-        plt.ylim(-0.05, 1.05)
-        plt.plot(x, y)
-        plt.title("Logit Fit")
-    plt.savefig("logit fit")
-    plt.clf()
+    # # LOGIT FIT
+    # for index, row in result.iterrows():
+    #     region = row["region"]
+    #     a = row["logit_alpha"]
+    #     b = row["logit_beta"]
+    #     x = np.arange(2, 6, 0.1)
+    #     s_min = 0.5
+    #     s_max = 0.99
+    #     y = s_min + (s_max - s_min) / (1 + np.exp(a * (x - b)))
+    #     plt.ylim(-0.05, 1.05)
+    #     plt.plot(x, y)
+    #     plt.title("Logit Fit")
+    # plt.savefig("logit fit")
+    # plt.clf()
 
     # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
     # run_through_file('iter9_pdfs/wire_harness.pdf')
