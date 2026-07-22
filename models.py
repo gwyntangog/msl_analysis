@@ -394,22 +394,31 @@ def generate_master_graph(df,x, xlabel = None, material = None):
         )
     plt.close()
 
-def step_tau_row(row, max_steps = 50):
+def step_tau_row(row, max_steps = 100):
     #'weight_attribute_1', 'weight_attribute_2', 'weight_attribute_3',
     #'weight_attribute_4', 'weight_attribute_5'
+    # print(f"max steps is {max_steps}")
+    # print(f"current weights are {row["weight_attribute_1"]} and {row["weight_attribute_2"]} and {row["weight_attribute_3"]} and {row["weight_attribute_1"]} and {row["weight_attribute_1"]}")
     new_row = row.copy()
+    if max_steps == 0:
+        # print("max reached")
+        new_row["tau_value"] = None
+        return new_row
     cu_utility = calc_utility_row(row, variable = "cu")
     al_utility = calc_utility_row(row, variable = "al")
     market_share_cu = row["copper_product_market_share"]
     current_tau = tau_callibrate(cu_utility, al_utility, market_share_cu)
     new_row["tau_value"] = current_tau
-    if current_tau <= 0:
+    if current_tau <= 0 and max_steps >=50:
         new_row["weight_attribute_2"] = new_row["weight_attribute_2"]+0.1
         new_row["weight_attribute_1"] = new_row["weight_attribute_1"]-0.025
         new_row["weight_attribute_3"] = new_row["weight_attribute_3"]-0.025
         new_row["weight_attribute_4"] = new_row["weight_attribute_4"]-0.025
         new_row["weight_attribute_5"] = new_row["weight_attribute_5"]-0.025
-        return step_tau_row(new_row, max_steps -1)
+        return step_tau_row(new_row, max_steps = max_steps -1)
+    elif current_tau <=0:
+        new_row["weight_attribute_2"] = new_row["weight_attribute_2"]+0.1
+        return step_tau_row(new_row, max_steps = max_steps -1)
     else:
         return new_row
 
@@ -508,13 +517,13 @@ def find_logit_fit(ratios, shares, s_min=0, s_max = 1):
     shares = np.array(shares)
     ratios = np.array(ratios)
 
-    problem_mask = (shares <= s_min) | (shares >= s_max)
-    if problem_mask.any():
-        print(f"\n[find_logit_fit] s_min={s_min}, s_max={s_max}")
-        print(f"  shares range: [{shares.min():.6f}, {shares.max():.6f}]")
-        print(f"  {problem_mask.sum()} values at or outside bounds:")
-        print(f"  {shares[problem_mask]}")
-        print(f"  at ratios: {ratios[problem_mask]}")
+    # problem_mask = (shares <= s_min) | (shares >= s_max)
+    # if problem_mask.any():
+    #     print(f"\n[find_logit_fit] s_min={s_min}, s_max={s_max}")
+    #     print(f"  shares range: [{shares.min():.6f}, {shares.max():.6f}]")
+    #     print(f"  {problem_mask.sum()} values at or outside bounds:")
+    #     print(f"  {shares[problem_mask]}")
+    #     print(f"  at ratios: {ratios[problem_mask]}")
     # print(shares)
     shares = np.maximum(shares, s_min)
     #### replace values in array to a new minimum
@@ -600,6 +609,7 @@ def run_through_file(filename):
     result = step_tau_df(result)
     result.to_csv(f"iter9_graphs/{product}/overall_data.csv", index=False)
 
+    print(result[["copper_product_market_share","aluminum_product_market_share","cu_utility","al_utility", "tau_value"]])
     fit_results = []
 
     # GRAPHING
@@ -612,7 +622,7 @@ def run_through_file(filename):
         y = point_generation_price(result, region, price_range=x, variable="al")
         generate_graph(result, region, 1000 * x, y,
                        xlabel="Aluminum Price (dollars per tonne)", material="al")
-        x = np.arange(2, 6, 0.1)
+        x = np.arange(2, 20, 0.1)
         y = point_generation_ratio(result, region, ratio_range=x)
         generate_graph(result, region, x, y,
                        xlabel="Ratio of Copper Price to Aluminum Price")
@@ -625,7 +635,7 @@ def run_through_file(filename):
                           xlabel="Copper Price (dollars per tonne)", material="cu")
     generate_master_graph(result, x,
                           xlabel="Aluminum Price (dollars per tonne)", material="al")
-    x = np.arange(2, 6, 0.1)
+    x = np.arange(2, 20, 0.1)
     generate_master_graph(result, x,
                           xlabel="Ratio of Copper Price to Aluminum Price",
                           material=None)
@@ -637,8 +647,9 @@ def run_through_file(filename):
 
 
 # ── Everything below this line was previously at module level ──────────────
-# if __name__ == "__main__":
-#     return
+if __name__ == "__main__":
+    run_through_file('iter9_pdfs/commercial_hvac.pdf')
+    run_through_file('iter9_pdfs/solar_array.pdf')
 
     ####################### TESTING
 
