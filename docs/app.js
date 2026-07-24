@@ -231,33 +231,33 @@ function renderExplorer() {
   ];
 
   const layout = {
-    paper_bgcolor: "rgba(0,0,0,0)",
-    plot_bgcolor:  "rgba(0,0,0,0)",
-    font: { color: "#e2e8f0", family: "Inter, sans-serif", size: 12 },
-    xaxis: {
-      color: "#94a3b8", gridcolor: "rgba(0,0,0,0)",
-      tickangle: regions.length > 5 ? -30 : 0,
-    },
-    yaxis: {
-      title: { text: "Cu Market Share", standoff: 8 },
-      range: [-0.05, 1.1],
-      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
-    },
-    shapes: [{
-      type: "line",
-      x0: -0.5, x1: Math.max(0, regions.length - 0.5),
-      y0: 0.5,  y1: 0.5,
-      xref: "x", yref: "y",
-      line: { color: "#334155", width: 1.2, dash: "dot" },
-    }],
-    legend: {
-      bgcolor: "rgba(0,0,0,0)", bordercolor: "#252d48",
-      font: { size: 10 }, orientation: "h", y: -0.32,
-    },
-    bargap: 0.38,
-    margin: { t: 10, r: 18, b: 85, l: 55 },
-    hovermode: "closest",
-  };
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor:  "rgba(0,0,0,0)",
+  font: { color: "#1e293b", family: "Inter, sans-serif", size: 12 }, // 👈 dark
+  xaxis: {
+    color: "#475569", gridcolor: "rgba(0,0,0,0)",                    // 👈 dark
+    tickangle: regions.length > 5 ? -30 : 0,
+  },
+  yaxis: {
+    title: { text: "Cu Market Share", standoff: 8 },
+    range: [-0.05, 1.1],
+    gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569", // 👈 light grid, dark labels
+  },
+  shapes: [{
+    type: "line",
+    x0: -0.5, x1: Math.max(0, regions.length - 0.5),
+    y0: 0.5,  y1: 0.5,
+    xref: "x", yref: "y",
+    line: { color: "#94a3b8", width: 1.2, dash: "dot" },
+  }],
+  legend: {
+    bgcolor: "rgba(0,0,0,0)", bordercolor: "#cbd5e1",
+    font: { size: 10, color: "#1e293b" }, orientation: "h", y: -0.32, // 👈 dark
+  },
+  bargap: 0.38,
+  margin: { t: 10, r: 18, b: 85, l: 55 },
+  hovermode: "closest",
+};
 
   Plotly.react("chart-explorer", traces, layout, {
     responsive: true, displayModeBar: false,
@@ -382,25 +382,26 @@ function renderChart() {
 
   // ── Layout ────────────────────────────────────────────────────────────
   const layout = {
-    paper_bgcolor: "rgba(0,0,0,0)",
-    plot_bgcolor:  "rgba(0,0,0,0)",
-    font:   { color: "#e2e8f0", family: "Inter, sans-serif", size: 12 },
-    xaxis:  {
-      title: { text: labels.x, standoff: 8 },
-      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
-    },
-    yaxis:  {
-      title: { text: labels.y, standoff: 8 },
-      range: [-0.05, 1.05],
-      gridcolor: "#1a1f35", zerolinecolor: "#1a1f35", color: "#94a3b8",
-    },
-    shapes, annotations: annots,
-    legend: {
-      bgcolor: "rgba(0,0,0,0)", bordercolor: "#252d48", font: { size: 11 },
-    },
-    margin:    { t: 28, r: 18, b: 52, l: 60 },
-    hovermode: "closest",
-  };
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor:  "rgba(0,0,0,0)",
+  font: { color: "#1e293b", family: "Inter, sans-serif", size: 12 },  // 👈 dark
+  xaxis: {
+    title: { text: labels.x, standoff: 8 },
+    gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569", // 👈
+  },
+  yaxis: {
+    title: { text: labels.y, standoff: 8 },
+    range: [-0.05, 1.05],
+    gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569", // 👈
+  },
+  shapes, annotations: annots,
+  legend: {
+    bgcolor: "rgba(0,0,0,0)", bordercolor: "#cbd5e1",
+    font: { size: 11, color: "#1e293b" },                              // 👈 dark
+  },
+  margin:    { t: 28, r: 18, b: 52, l: 60 },
+  hovermode: "closest",
+};
 
   Plotly.react("chart-main", traces, layout, {
     responsive: true,
