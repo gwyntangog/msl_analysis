@@ -4804,23 +4804,7 @@
     "s_min": 0,
     "s_max": 1
   },
-  "sanity_check": {
-    "a1_max": "CORRECT",
-    "a1_min": "CORRECT",
-    "a2_max": "CORRECT",
-    "a2_min": "CORRECT",
-    "a3_max": "CORRECT",
-    "a3_min": "CORRECT",
-    "a4_max": "CORRECT",
-    "a4_min": "CORRECT",
-    "a5_max": "CORRECT",
-    "a5_min": "CORRECT",
-    "a1_values": "NOT NORMALIZED",
-    "a2_values": "NORMALIZED",
-    "a3_values": "INCONSISTENT",
-    "a4_values": "NOT NORMALIZED",
-    "a5_values": "NOT NORMALIZED"
-  },
+  "sanity_check": "Attribute 3 has inconsistent values. \n",
   "region_params": {
     "United States": {
       "copper_price_per_kg": 9.5,

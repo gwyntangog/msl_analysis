@@ -24,9 +24,9 @@
   --red:        #ef4444;
   --red-dim:    rgba(239,68,68,.10);
 
-  --text:       #1e293b;
-  --muted:      #64748b49;
-  --faint:      #94a3b89c;
+  --text:       #0e0e0f;
+  --muted:      #3d3f4349;
+  --faint:      #3b40469c;
 
 
   --border:     #dbe5f0;
@@ -324,10 +324,31 @@ header {
 .badge-logit { background: var(--green-dim); color: var(--green); }
 
 /* ── Sanity grid ─────────────────────────────────────────────────────────── */
+
 .sanity-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.sanity-card {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sanity-ok {
+  background-color: #e6f4ea;
+  color: #2d6a4f;
+  border: 1px solid #95d5b2;
+}
+
+.sanity-error {
+  background-color: #fdecea;
+  color: #b91c1c;
+  border: 1px solid #f5a5a0;
 }
 
 .san-item {
@@ -424,7 +445,7 @@ header {
   font-family: 'JetBrains Mono', monospace;
   flex-shrink: 0;
 }
-.cu-badge { background: rgba(245,158,11,.14); color: #f59e0b;
+.cu-badge { background: rgba(247, 242, 238, 0.14); color: #f59e0b;
             border: 1px solid rgba(245,158,11,.28); }
 .al-badge { background: rgba(129,140,248,.14); color: #818cf8;
             border: 1px solid rgba(129,140,248,.28); }

@@ -15,7 +15,7 @@ const AXES = {
 // ── Shared state ───────────────────────────────────────────────────────────
 const S = {
   data:         null,
-  graphType:    "copper_price",
+  graphType:    "ratio",
   selRegions:   new Set(),
   showObserved: true,
   showFits:     false,
@@ -495,6 +495,7 @@ function buildRegionList(regions) {
 }
 
 function renderAll() {
+  $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
   renderChart();
   renderFitTable();
   renderSanity();
@@ -530,18 +531,61 @@ function renderFitTable() {
   });
 }
 
-// ── Sanity check ───────────────────────────────────────────────────────────
+function exportFitResults() {
+  if (!S.data || !S.data.fit_results || S.data.fit_results.length === 0) {
+    alert("No fit results to export.");
+    return;
+  }
+
+  const rows = S.data.fit_results;
+  const headers = Object.keys(rows[0]);
+
+  const csv = [
+    headers.join(","),
+    ...rows.map(row =>
+      headers.map(h => {
+        const val = row[h];
+        if (val === null || val === undefined) return "";
+        // Wrap strings in quotes in case they contain commas
+        if (typeof val === "string") return `"${val}"`;
+        return val;
+      }).join(",")
+    )
+  ].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${S.data.product}_fit_results.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
 function renderSanity() {
-  if (!S.data) return;
-  const grid = $("sanity-grid");
+  const grid = document.getElementById("sanity-grid");
+  if (!grid) return;
   grid.innerHTML = "";
-  Object.entries(S.data.sanity_check).forEach(([key, value]) => {
-    const cls = "san-" + value.toLowerCase().replace(/\s+/g, "-");
-    const div = document.createElement("div");
-    div.className = `san-item ${cls}`;
-    div.innerHTML =
-      `<span class="san-key">${key}</span><span class="san-val">${value}</span>`;
-    grid.appendChild(div);
+
+  if (!S.data) {
+    grid.innerHTML = `<div class="sanity-card sanity-error">No data</div>`;
+    return;
+  }
+
+  const text = S.data.sanity_check;
+
+  if (!text || text.trim() === "") {
+    grid.innerHTML = `<div class="sanity-card sanity-ok">✓ All Clear</div>`;
+    return;
+  }
+
+  const lines = text.split("\n").map(l => l.trim()).filter(l => l !== "");
+  lines.forEach(line => {
+    const card = document.createElement("div");
+    card.className = "sanity-card sanity-error";
+    card.textContent = "⚠ " + line;
+    grid.appendChild(card);
   });
 }
 
@@ -558,6 +602,7 @@ $("graph-tabs").addEventListener("click", e => {
   tab.classList.add("active");
   S.graphType = tab.dataset.g;
   $("toggle-fits-wrap").classList.toggle("enabled", S.graphType === "ratio");
+  $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
   renderChart();
 });
 

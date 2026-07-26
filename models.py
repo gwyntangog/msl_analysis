@@ -433,25 +433,22 @@ def step_tau_df(df):
     result = result.T
     return result
 
+
 def sanity_check(df, num_attributes = 5):
     """
     Checks the following:
         1. Were min maxes true or not?
         2. Are all normalized or not?
     """
-    result = {}
+    res_str = ""
     # CHECK MINS AND MAXES
     for i in range(1,num_attributes + 1):
         max_observed = max(df[f"cu_attribute_{i}_value"].max(), df[f"al_attribute_{i}_value"].max(), df[f"attribute_{i}_max"].max())
         min_observed = min(df[f"cu_attribute_{i}_value"].min(), df[f"al_attribute_{i}_value"].min(), df[f"attribute_{i}_min"].min())
         if max_observed > df[f"attribute_{i}_max"].max():
-            result[f"a{i}_max"] = "ERROR"
-        else:
-            result[f"a{i}_max"] = "CORRECT"
+            res_str = res_str + f"Attribute {i} maximum is too low. \n"
         if min_observed < df[f"attribute_{i}_min"].min():
-             result[f"a{i}_min"] = "ERROR"
-        else:
-            result[f"a{i}_min"] = "CORRECT"
+             res_str = res_str + f"Attribute {i} minimum is too high. \n"
     # CHECK NORMALIZED
     for i in range(1,num_attributes + 1):
         att_values = df[f"cu_attribute_{i}_value"].tolist() + df[f"al_attribute_{i}_value"].tolist()
@@ -460,13 +457,10 @@ def sanity_check(df, num_attributes = 5):
         for one_val in att_values:
             if  (0 <= one_val and  one_val <= 1):
                 num_normalized += 1
-        if num_normalized == total:
-            result[f"a{i}_values"] = "NORMALIZED"
-        elif num_normalized == 0:
-            result[f"a{i}_values"] = "NOT NORMALIZED"
-        else:
-            result[f"a{i}_values"] = "INCONSISTENT"
-    return result
+        if num_normalized >= 1 and num_normalized < total:
+            res_str = res_str + f"Attribute {i} has inconsistent values. \n"
+    return res_str
+
 
 ################################################ Add to all rows, do testing
 
