@@ -194,6 +194,7 @@ function initPriceExplorer() {
 }
 
 function renderExplorer() {
+  if (!$("chart-explorer")) return;
   if (!S.data?.region_params || S.cuPrice == null) return;
 
   const regions = S.data.regions.filter(r => S.selRegions.has(r));
@@ -260,9 +261,9 @@ function renderExplorer() {
   hovermode: "closest",
 };
 
-  Plotly.react("chart-explorer", traces, layout, {
-    responsive: true, displayModeBar: false,
-  });
+  // Plotly.react("chart-explorer", traces, layout, {
+  //   responsive: true, displayModeBar: false,
+  // });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -455,6 +456,7 @@ function renderFitChart() {
       traces.push({
         x: xs, y: ysFit,
         type: "scatter", mode: "lines", name: `${r} (${S.fitType} fit)`,
+        opacity: 0.45,
         line: { color: c, width: 2.2 },
         hovertemplate: `<b>${r} ${S.fitType} fit</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
       });
