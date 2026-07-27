@@ -461,6 +461,24 @@ def sanity_check(df, num_attributes = 5):
             res_str = res_str + f"Attribute {i} has inconsistent values. \n"
     return res_str
 
+def correct_att_2(row):
+    new_row = row.copy()
+    cu_share = new_row["copper_product_market_share"]
+    al_share = new_row["aluminum_product_market_share"]
+    if cu_share > al_share:
+        new_row['cu_attribute_2_value'] = 1
+        new_row['al_attribute_2_value'] = 0
+    elif al_share > cu_share:
+        new_row['cu_attribute_2_value'] = 0
+        new_row['al_attribute_2_value'] = 1
+    else:
+        new_row['cu_attribute_2_value'] = 0.5
+        new_row['al_attribute_2_value'] = 0.5
+    return new_row
+
+def correct_att_2_df(df):
+    df = df.apply(correct_att_2, axis = 1)
+    return df
 
 ################################################ Add to all rows, do testing
 
@@ -598,6 +616,7 @@ def run_through_file(filename):
 
     result = get_true_mins_maxes(result)
     result = normalize_attributes(result)
+    result = correct_att_2_df(result)
     result = calc_utilities(result)
     result = tau_callibrate_df(result)
     result = step_tau_df(result)
@@ -642,76 +661,15 @@ def run_through_file(filename):
 
 # ── Everything below this line was previously at module level ──────────────
 if __name__ == "__main__":
-    run_through_file('iter9_pdfs/commercial_hvac.pdf')
-    run_through_file('iter9_pdfs/solar_array.pdf')
-
-    ####################### TESTING
-
-    # # print(find_fit('iter9_pdfs/wire_harness.pdf'))
-    # # run_through_file('iter9_pdfs/interconnect.pdf')
-    # # run_through_file('iter9_pdfs/busbar.pdf')
-    # # run_through_file('iter9_pdfs/motor_winding.pdf')
-    # # run_through_file('iter9_pdfs/wire_harness.pdf')
-    # # run_through_file('iter9_pdfs/ice_busbar.pdf')
-    # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-    # # run_through_file('iter9_pdfs/ice_alternator.pdf')
-    # # plot all the fits
-
-    # result = pd.read_csv("fit_results.csv")
+    filename = 'iter9_pdfs/solar_array.pdf'
+    result = parse_pdf(filename)
+    result = calc_product_cost(result)
+    result = get_true_mins_maxes(result)
+    print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
+    result = correct_att_2_df(result)
+    print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
+    # result = normalize_attributes(result)
+    # result = calc_utilities(result)
+    # result = tau_callibrate_df(result)
+    # result = step_tau_df(result)
     # print(result.columns)
-
-    # # LINEAR FIT
-    # for index, row in result.iterrows():
-    #     region = row["region"]
-    #     a = row["poly_a"]
-    #     b = row["poly_b"]
-    #     def f(x):
-    #         return a + b * x
-    #     x = np.arange(2, 6, 0.1)
-    #     y = f(x)
-    #     plt.ylim(-0.05, 1.05)
-    #     plt.plot(x, y)
-    #     plt.title("Linear Fit")
-    # plt.savefig("linear fit")
-    # plt.clf()
-
-    # # POWER FIT
-    # for index, row in result.iterrows():
-    #     region = row["region"]
-    #     a = row["power_alpha"]
-    #     b = row["power_beta"]
-    #     def f(x):
-    #         return a * (x ** b)
-    #     x = np.arange(2, 6, 0.1)
-    #     y = f(x)
-    #     plt.ylim(-0.05, 1.05)
-    #     plt.plot(x, y)
-    #     plt.title("Power Fit")
-    # plt.savefig("power fit")
-    # plt.clf()
-
-    # # LOGIT FIT
-    # for index, row in result.iterrows():
-    #     region = row["region"]
-    #     a = row["logit_alpha"]
-    #     b = row["logit_beta"]
-    #     x = np.arange(2, 6, 0.1)
-    #     s_min = 0.5
-    #     s_max = 0.99
-    #     y = s_min + (s_max - s_min) / (1 + np.exp(a * (x - b)))
-    #     plt.ylim(-0.05, 1.05)
-    #     plt.plot(x, y)
-    #     plt.title("Logit Fit")
-    # plt.savefig("logit fit")
-    # plt.clf()
-
-    # run_through_file('iter9_pdfs/ice_wire_harness.pdf')
-    # run_through_file('iter9_pdfs/wire_harness.pdf')
-    # etc.
-
-
-# folder_path = Path("iter9_pdfs")
-
-# # Loop through all CSV files in the folder
-# for file_path in folder_path.glob("*.pdf"):
-#     run_through_file(file_path)

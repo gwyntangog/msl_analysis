@@ -40,6 +40,7 @@ def _serial(obj):
 def _run_pipeline(pdf_path):
     df = parse_pdf(pdf_path)
     df = calc_product_cost(df)
+    df = correct_att_2_df(df)
     df = get_true_mins_maxes(df)
     df = normalize_attributes(df)
     df = calc_utilities(df)
