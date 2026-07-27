@@ -19,7 +19,8 @@ const S = {
   selRegions:   new Set(),
   showObserved: true,
   showFits:     false,
-  cuPrice:      null,   // $/tonne
+  fitType:      "poly",
+  cuPrice:      null,
   alPrice:      null,
 };
 
@@ -414,6 +415,82 @@ function renderChart() {
     `${cap(S.data.product)}  ·  showing ${regions.length} / ${S.data.regions.length} regions`;
 }
 
+  //-------------- render fit chart
+function renderFitChart() {
+  if (!S.data) return;
+
+  const regions  = S.data.regions.filter(r => S.selRegions.has(r));
+  const xs       = X_RANGES["ratio"];
+  const { s_min, s_max } = S.data.fit_bounds;
+  const traces   = [];
+
+  regions.forEach(r => {
+    const fit = S.data.fit_results.find(f => f.region === r);
+    const p   = S.data.region_params?.[r];
+    if (!fit || !p) return;
+    const c = colorFor(r);
+
+    // ── Actual computed curve (dashed, for reference) ──────────────────
+    const ysActual = computeCurve(p, "ratio", S.cuPrice, S.alPrice);
+    traces.push({
+      x: xs, y: ysActual,
+      type: "scatter", mode: "lines", name: `${r} (model)`,
+      line: { color: c, width: 1.5, dash: "dot" },
+      hovertemplate: `<b>${r} model</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+    });
+
+    // ── Fit curve ──────────────────────────────────────────────────────
+    let ysFit;
+    if (S.fitType === "poly" && fit.poly_a != null) {
+      ysFit = xs.map(x => fit.poly_a + fit.poly_b * x);
+    } else if (S.fitType === "power" && fit.power_alpha != null) {
+      ysFit = xs.map(x => fit.power_alpha * Math.exp(fit.power_beta * x));
+    } else if (S.fitType === "logit" && fit.logit_alpha != null) {
+      ysFit = xs.map(x =>
+        s_min + (s_max - s_min) / (1 + Math.exp(fit.logit_alpha * (x - fit.logit_beta)))
+      );
+    }
+
+    if (ysFit) {
+      traces.push({
+        x: xs, y: ysFit,
+        type: "scatter", mode: "lines", name: `${r} (${S.fitType} fit)`,
+        line: { color: c, width: 2.2 },
+        hovertemplate: `<b>${r} ${S.fitType} fit</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+      });
+    }
+  });
+
+  const layout = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor:  "rgba(0,0,0,0)",
+    font: { color: "#1e293b", family: "Inter, sans-serif", size: 12 },
+    xaxis: {
+      title: { text: "Cu / Al Price Ratio", standoff: 8 },
+      gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569",
+    },
+    yaxis: {
+      title: { text: "Cu Product Market Share", standoff: 8 },
+      range: [-0.05, 1.05],
+      gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569",
+    },
+    legend: {
+      bgcolor: "rgba(0,0,0,0)", bordercolor: "#cbd5e1",
+      font: { size: 11, color: "#1e293b" },
+    },
+    margin: { t: 28, r: 18, b: 52, l: 60 },
+    hovermode: "closest",
+  };
+
+  Plotly.react("chart-fit", traces, layout, {
+    responsive: true, displayModeBar: false,
+  });
+
+  $("chart-fit-caption").textContent =
+    `${cap(S.data.product)}  ·  ${S.fitType} fit vs model curve`;
+}
+
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════════════════════════════════════
@@ -489,14 +566,18 @@ function buildRegionList(regions) {
       e.target.checked ? S.selRegions.add(r) : S.selRegions.delete(r);
       renderChart();
       renderExplorer();
+      renderFitChart();
     });
     el.appendChild(label);
   });
 }
 
 function renderAll() {
+  const isRatio = S.graphType === "ratio";
   $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
+  $("card-fit-curves").classList.toggle("hidden", !isRatio);
   renderChart();
+  renderFitChart();
   renderFitTable();
   renderSanity();
 }
@@ -603,19 +684,30 @@ $("graph-tabs").addEventListener("click", e => {
   S.graphType = tab.dataset.g;
   $("toggle-fits-wrap").classList.toggle("enabled", S.graphType === "ratio");
   $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
+  $("card-fit-curves").classList.toggle("hidden", S.graphType !== "ratio");
   renderChart();
+  renderFitChart();
+});
+
+$("fit-tabs").addEventListener("click", e => {
+  const tab = e.target.closest(".tab");
+  if (!tab) return;
+  document.querySelectorAll("#fit-tabs .tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  S.fitType = tab.dataset.f;
+  renderFitChart();
 });
 
 $("btn-all").addEventListener("click", () => {
   S.selRegions = new Set(S.data?.regions ?? []);
   document.querySelectorAll("#region-list input").forEach(c => c.checked = true);
-  renderChart(); renderExplorer();
+  renderChart(); renderExplorer(); renderFitChart();
 });
 
 $("btn-none").addEventListener("click", () => {
   S.selRegions = new Set();
   document.querySelectorAll("#region-list input").forEach(c => c.checked = false);
-  renderChart(); renderExplorer();
+  renderChart(); renderExplorer(); renderFitChart();
 });
 
 $("toggle-observed").addEventListener("change", e => {
