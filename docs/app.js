@@ -436,7 +436,8 @@ function renderFitChart() {
     traces.push({
       x: xs, y: ysActual,
       type: "scatter", mode: "lines", name: `${r} (model)`,
-      line: { color: c, width: 1.5, dash: "dot" },
+      opacity: 0.45,
+      line: { color: c, width: 2.2 },
       hovertemplate: `<b>${r} model</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
     });
 
@@ -456,8 +457,8 @@ function renderFitChart() {
       traces.push({
         x: xs, y: ysFit,
         type: "scatter", mode: "lines", name: `${r} (${S.fitType} fit)`,
-        opacity: 0.45,
-        line: { color: c, width: 2.2 },
+        opacity: 1,
+         line: { color: c, width: 1.5, dash: "dot" },
         hovertemplate: `<b>${r} ${S.fitType} fit</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
       });
     }
@@ -684,7 +685,7 @@ $("graph-tabs").addEventListener("click", e => {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   tab.classList.add("active");
   S.graphType = tab.dataset.g;
-  $("toggle-fits-wrap").classList.toggle("enabled", S.graphType === "ratio");
+  // $("toggle-fits-wrap").classList.toggle("enabled", S.graphType === "ratio");
   $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
   $("card-fit-curves").classList.toggle("hidden", S.graphType !== "ratio");
   renderChart();
@@ -717,9 +718,9 @@ $("toggle-observed").addEventListener("change", e => {
   renderChart();
 });
 
-$("toggle-fits").addEventListener("change", e => {
-  S.showFits = e.target.checked;
-  renderChart();
-});
+// $("toggle-fits").addEventListener("change", e => {
+//   S.showFits = e.target.checked;
+//   renderChart();
+// });
 
 init();

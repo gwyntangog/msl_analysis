@@ -197,8 +197,8 @@ header {
 }
 .toggle input { accent-color: var(--blue); }
 
-#toggle-fits-wrap { opacity: .38; pointer-events: none; }
-#toggle-fits-wrap.enabled { opacity: 1; pointer-events: auto; }
+/* #toggle-fits-wrap { opacity: .38; pointer-events: none; }
+#toggle-fits-wrap.enabled { opacity: 1; pointer-events: auto; } */
 
 /* ── Main ────────────────────────────────────────────────────────────────── */
 .main {
