@@ -52,7 +52,8 @@ def _run_pipeline(pdf_path):
 def export_product(pdf_path, output_dir="docs/data"):
     print(f"  Processing {Path(pdf_path).name} …")
     df      = _run_pipeline(pdf_path)
-    product = df["cu_product"].iloc[0]
+    product = Path(pdf_path).stem
+    print(f"Product name: {product}")
     regions = df["region"].tolist()
 
     # ── Pre-computed graph series ──────────────────────────────────────────

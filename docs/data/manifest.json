@@ -1,16 +1,16 @@
 {
   "products": [
-    "EV HV DC Link Laminated Busbar",
-    "Large Commercial HVAC Fin-and-Tube Heat Exchanger Coil",
-    "LLDPE Jacket, Full Cu Concentric Neutral, URD Cable",
-    "ICE Alternator Winding",
-    "ICE PDC Busbar",
-    "ICE Wire Harness",
-    "EV Battery Cell-to-Cell Interconnect",
+    "Commercial HVAC",
+    "Distribution Lines",
+    "EV Busbar",
+    "EV Interconnect",
     "EV Traction Motor Winding",
-    "Residential Copper Tube-and-Fin HVAC Coil",
-    "MV Underground Solar Array Collection Cable \u2013 Cu Dominant (240mm\u00b2 Cu, XLPE, 15kV, Direct Burial)",
-    "138kV XLPE Cu 500mm\u00b2 Underground Transmission Cable",
-    "EV Wire Harness"
+    "ICE Alternator",
+    "ICE Busbar",
+    "ICE Wire Harness",
+    "Residential HVAC",
+    "Solar Array",
+    "Transmission Line",
+    "Wire Harness"
   ]
 }
