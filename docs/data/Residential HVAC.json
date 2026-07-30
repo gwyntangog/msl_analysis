@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0008584030411953071,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.0018702742833960181,
       "power_alpha": 0.7327127138484514,
       "power_beta": -0.011364115480407468,
-      "logit_error": 1.2799317370104786,
+      "logit_error": 9.791246743253677e-17,
       "logit_alpha": 0.03249724983398415,
       "logit_beta": 29.872909698996665
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.001116889813530237,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.0011942964294316726,
       "power_alpha": 0.4387185056444326,
       "power_beta": -0.023640649908232093,
-      "logit_error": 0.3955824188215817,
+      "logit_error": 9.507381976999465e-17,
       "logit_alpha": 0.036084789512260323,
       "logit_beta": -7.4364548494983325
     },
     {
       "region": "India",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0011219996726694063,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.0082629256040084,
       "power_alpha": 0.7481048970227168,
       "power_beta": -0.03433668238440717,
-      "logit_error": 0.776626874751444,
+      "logit_error": 1.9256316157545706e-16,
       "logit_alpha": 0.07395426055356434,
       "logit_beta": 12.170568561872912
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 1.2634941197616404e-05,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 9.246558101939895e-05,
       "power_alpha": 0.5574787278895796,
       "power_beta": -0.00351092187345543,
-      "logit_error": 0.6847983194881064,
+      "logit_error": 6.409875621278546e-17,
       "logit_alpha": 0.007577930478565161,
       "logit_beta": 30.280936454849495
     }

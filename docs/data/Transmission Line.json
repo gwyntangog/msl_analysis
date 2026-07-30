@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 3.0192336735429247e-06,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 1.865564880626743e-05,
       "power_alpha": 0.5532528406851194,
       "power_beta": -0.0015429603221282654,
-      "logit_error": 0.7208112467686949,
+      "logit_error": 6.13698867715858e-17,
       "logit_alpha": 0.0033839129655120095,
       "logit_beta": 63.10137610137633
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0004682774804825103,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.0005964397073378908,
       "power_alpha": 0.425083983477253,
       "power_beta": -0.015649804940466517,
-      "logit_error": 0.27100473139506787,
+      "logit_error": 8.139532547199558e-17,
       "logit_alpha": 0.02449184851589608,
       "logit_beta": -12.755104358293028
     },
     {
       "region": "India",
-      "best": "Power",
+      "best": "Logit",
       "poly_error": 0.000904417225596733,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.0004890019689739396,
       "power_alpha": 0.3254600017710722,
       "power_beta": -0.02106160440140184,
-      "logit_error": 0.8108891002503343,
+      "logit_error": 1.4064650884759757e-16,
       "logit_alpha": 0.02854150240279137,
       "logit_beta": -25.886519245894274
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0003039553768591734,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.0004871074438582702,
       "power_alpha": 0.7636146656802503,
       "power_beta": -0.004568227227185925,
-      "logit_error": 1.7086993339883636,
+      "logit_error": 9.39872261440677e-17,
       "logit_alpha": 0.016734962262707685,
       "logit_beta": 69.44773026804279
     }

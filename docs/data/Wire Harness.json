@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.01527921436280827,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.0293326554025798,
       "power_alpha": 1.021221429414478,
       "power_beta": -0.04138789164102676,
-      "logit_error": 1.6605619322522427,
+      "logit_error": 3.9888280543577063e-16,
       "logit_alpha": 0.13639864511027547,
       "logit_beta": 16.517142857142876
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.006865563759619124,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.030418237528394045,
       "power_alpha": 0.9959744941840408,
       "power_beta": -0.06838294010229462,
-      "logit_error": 1.101555781978799,
+      "logit_error": 2.4990295782562634e-16,
       "logit_alpha": 0.15384967746423933,
       "logit_beta": 10.940816326530618
     },
     {
       "region": "India",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.03609764963906601,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.08282588192262505,
       "power_alpha": 1.315794446189474,
       "power_beta": -0.08088754951402195,
-      "logit_error": 2.0013321113661853,
+      "logit_error": 3.5868705040660194e-16,
       "logit_alpha": 0.27141976226540787,
       "logit_beta": 12.798412698412706
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.007806832643191971,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.015786381920739296,
       "power_alpha": 0.9163827638442608,
       "power_beta": -0.03151328766112897,
-      "logit_error": 1.4824802592204696,
+      "logit_error": 2.3365293526274573e-16,
       "logit_alpha": 0.09713774302141372,
       "logit_beta": 18.071428571428587
     }

@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 9.927806498837925e-08,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 2.1572883769758367e-07,
       "power_alpha": 0.6503012930670973,
       "power_beta": -0.00012186554765321397,
-      "logit_error": 1.2659898494756796,
+      "logit_error": 7.674024879751226e-17,
       "logit_alpha": 0.00034762559031844675,
       "logit_beta": 1784.5642062229806
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 4.490818580091164e-06,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 8.48085114002442e-06,
       "power_alpha": 0.4025220077875569,
       "power_beta": -0.0016484844154423853,
-      "logit_error": 0.03443276648156766,
+      "logit_error": 6.010148589516138e-17,
       "logit_alpha": 0.0027263764336568825,
       "logit_beta": -144.91941493578514
     },
     {
       "region": "India",
-      "best": "Power",
+      "best": "Logit",
       "poly_error": 1.1615431620918576e-05,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 5.613642853833799e-06,
       "power_alpha": 0.25230527793228597,
       "power_beta": -0.0024096643947397797,
-      "logit_error": 0.8759226341503562,
+      "logit_error": 8.494596826789864e-17,
       "logit_alpha": 0.003194908931326803,
       "logit_beta": -340.06341278650154
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 1.8726570284650188e-06,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 3.301411704645714e-06,
       "power_alpha": 0.7010994344929341,
       "power_beta": -0.000411760164175693,
-      "logit_error": 1.535521835067367,
+      "logit_error": 8.95090418262362e-17,
       "logit_alpha": 0.0013632205489126675,
       "logit_beta": 625.3412913655277
     }

@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 7.457121869444389e-05,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.001419002974364622,
       "power_alpha": 0.5844287033339984,
       "power_beta": -0.015564223641277379,
-      "logit_error": 0.5130942378998024,
+      "logit_error": 7.93721036656248e-17,
       "logit_alpha": 0.030945563678339855,
       "logit_beta": 10.229250712250714
     },
     {
       "region": "China",
-      "best": "Power",
+      "best": "Logit",
       "poly_error": 0.010767970491099843,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.005136529887610511,
       "power_alpha": 0.5103118731536791,
       "power_beta": -0.07286076554624223,
-      "logit_error": 1.1210064191901217,
+      "logit_error": 1.7592525175853203e-16,
       "logit_alpha": 0.09993789512836732,
       "logit_beta": -0.9139090909090887
     },
     {
       "region": "India",
-      "best": "Power",
+      "best": "Logit",
       "poly_error": 0.023378721136480207,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.00596442912128064,
       "power_alpha": 0.5336621943360956,
       "power_beta": -0.12005793100624756,
-      "logit_error": 1.8365443420949317,
+      "logit_error": 1.577519882099228e-16,
       "logit_alpha": 0.15371742961522836,
       "logit_beta": -0.5762884054217356
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 7.890492073547874e-06,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.0001675031868431069,
       "power_alpha": 0.5404972821667339,
       "power_beta": -0.005090467843252949,
-      "logit_error": 0.5610036430450851,
+      "logit_error": 6.436528025723952e-17,
       "logit_alpha": 0.010424074590296891,
       "logit_beta": 15.317965034965043
     }

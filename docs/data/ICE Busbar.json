@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0005044849001584149,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.000635222558315608,
       "power_alpha": 0.8623785745982978,
       "power_beta": -0.003612978792622029,
-      "logit_error": 2.415406245765961,
+      "logit_error": 1.1071347765716937e-16,
       "logit_alpha": 0.021194556693920858,
       "logit_beta": 85.64181818181808
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0002787797172414731,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.0005420074809687367,
       "power_alpha": 0.7158372914520486,
       "power_beta": -0.005690840814291515,
-      "logit_error": 1.3999325403836265,
+      "logit_error": 9.102625228573334e-17,
       "logit_alpha": 0.017428833993717176,
       "logit_beta": 52.41471861471863
     },
     {
       "region": "India",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 7.31259761502321e-05,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.0002700666143832252,
       "power_alpha": 0.6125013087724765,
       "power_beta": -0.005312007010288893,
-      "logit_error": 0.8971722662574908,
+      "logit_error": 7.447602459741819e-17,
       "logit_alpha": 0.012602504016117485,
       "logit_beta": 35.97337662337664
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.00022277342948041266,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.00035325014604888706,
       "power_alpha": 0.7613929337622928,
       "power_beta": -0.003846536774872358,
-      "logit_error": 1.7289879016797096,
+      "logit_error": 9.614813431917819e-17,
       "logit_alpha": 0.01427118223000133,
       "logit_beta": 80.78116883116887
     }

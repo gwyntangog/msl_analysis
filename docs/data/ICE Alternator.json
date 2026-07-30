@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0059881734893260635,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.00806488252255237,
       "power_alpha": 0.9276735329832845,
       "power_beta": -0.014680566338572025,
-      "logit_error": 2.2160039273015513,
+      "logit_error": 1.5258555995074125e-16,
       "logit_alpha": 0.07289765441322056,
       "logit_beta": 29.87709090909093
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.00980245227524259,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.025503274067091145,
       "power_alpha": 0.9758980831019882,
       "power_beta": -0.04617057116281759,
-      "logit_error": 1.3497734297822255,
+      "logit_error": 2.758853954129931e-16,
       "logit_alpha": 0.1278767200502725,
       "logit_beta": 14.64086580086581
     },
     {
       "region": "India",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.026094921438862072,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.0442324948177554,
       "power_alpha": 1.1102563153093639,
       "power_beta": -0.045697047919983275,
-      "logit_error": 1.9659301755080705,
+      "logit_error": 2.7336071744532853e-16,
       "logit_alpha": 0.1737685696361952,
       "logit_beta": 16.44454545454546
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0019191439562297402,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.002726427844782242,
       "power_alpha": 0.8521700291242859,
       "power_beta": -0.009303295441999558,
-      "logit_error": 2.009685655512939,
+      "logit_error": 1.2793015548716668e-16,
       "logit_alpha": 0.04095418970499153,
       "logit_beta": 40.825454545454576
     }

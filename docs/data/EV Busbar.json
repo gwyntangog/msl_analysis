@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0005868801925510865,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.0057669839393621,
       "power_alpha": 0.6993652355943188,
       "power_beta": -0.029686471160011715,
-      "logit_error": 0.6869607051721135,
+      "logit_error": 1.3760098573588402e-16,
       "logit_alpha": 0.06201179315419311,
       "logit_beta": 11.69443750000001
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0011010791504136167,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.0031812858492966975,
       "power_alpha": 0.5793996726883609,
       "power_beta": -0.028544779873417466,
-      "logit_error": 0.35360563936914163,
+      "logit_error": 1.152589986593284e-16,
       "logit_alpha": 0.0505824072190209,
       "logit_beta": 5.160921875000005
     },
     {
       "region": "India",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0020070770752469713,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.005055136330177352,
       "power_alpha": 0.6182756777906316,
       "power_beta": -0.03685752214879519,
-      "logit_error": 0.42785704861402246,
+      "logit_error": 1.4291052130317915e-16,
       "logit_alpha": 0.0649156768608087,
       "logit_beta": 5.870275000000006
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0004431847218982285,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.004996234442695662,
       "power_alpha": 0.6754019921754406,
       "power_beta": -0.028727034849749984,
-      "logit_error": 0.6209946472063919,
+      "logit_error": 1.2315749377577354e-16,
       "logit_alpha": 0.05834114276581884,
       "logit_beta": 10.850400000000008
     }

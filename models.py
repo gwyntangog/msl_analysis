@@ -559,9 +559,9 @@ def find_logit_fit(ratios, shares, s_min=0, s_max = 1):
     beta  = B / A
 
     # ── Verification: reconstruct S_c and compare ─────────────────────────────────
-    y_pred = s_min + (s_max - s_min) / (1 + np.exp(alpha * (x - beta)))
+    shares_pred = s_min + (s_max - s_min) / (1 + np.exp(alpha * (x - beta)))
 
-    mse = mean_squared_error(y, y_pred)
+    mse = mean_squared_error(shares, shares_pred)
     rmse = np.sqrt(mse)
     return {"logit_error": rmse, "logit_alpha":alpha, "logit_beta":beta}
 

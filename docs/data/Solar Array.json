@@ -4729,7 +4729,7 @@
   "fit_results": [
     {
       "region": "United States",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0026411548551612605,
       "poly_degree": 1,
       "poly_equation": [
@@ -4741,13 +4741,13 @@
       "power_error": 0.013718584091609188,
       "power_alpha": 0.7994561869151019,
       "power_beta": -0.0506339412506659,
-      "logit_error": 0.7505422221284945,
+      "logit_error": 2.1271228022880451e-16,
       "logit_alpha": 0.10163038573343298,
       "logit_beta": 9.89108392080599
     },
     {
       "region": "China",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0013881184301145033,
       "poly_degree": 1,
       "poly_equation": [
@@ -4759,13 +4759,13 @@
       "power_error": 0.00141025876931135,
       "power_alpha": 0.44321642621449764,
       "power_beta": -0.026218663202309207,
-      "logit_error": 0.4345190936256342,
+      "logit_error": 1.566271612689591e-16,
       "logit_alpha": 0.03973094419097847,
       "logit_beta": -6.405272398238933
     },
     {
       "region": "India",
-      "best": "Power",
+      "best": "Logit",
       "poly_error": 0.006161896016203819,
       "poly_degree": 1,
       "poly_equation": [
@@ -4777,13 +4777,13 @@
       "power_error": 0.002973247695986496,
       "power_alpha": 0.4341052965582248,
       "power_beta": -0.05526171705347009,
-      "logit_error": 1.016247671579382,
+      "logit_error": 1.568046734741784e-16,
       "logit_alpha": 0.07475281109752535,
       "logit_beta": -4.481149555681605
     },
     {
       "region": "Europe",
-      "best": "Poly",
+      "best": "Logit",
       "poly_error": 0.0003281493686243442,
       "poly_degree": 1,
       "poly_equation": [
@@ -4795,7 +4795,7 @@
       "power_error": 0.0036932559397105757,
       "power_alpha": 0.6599921931279235,
       "power_beta": -0.023687681738124085,
-      "logit_error": 0.6500159537348272,
+      "logit_error": 1.2698997362391431e-16,
       "logit_alpha": 0.04928983792055405,
       "logit_beta": 12.02614001615704
     }
