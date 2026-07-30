@@ -149,6 +149,36 @@ def export_product(pdf_path, output_dir="docs/data"):
         "cu_step": 100,  "al_step": 50,
     }
 
+    # ── Product overview info ──────────────────────────────────────────────────
+    def sf_str(val, default="—"):
+        try: return str(val) if pd.notna(val) else default
+        except: return default
+
+    # Weights and directions are global (same for all regions)
+    first_row = df.iloc[0]
+    attributes = {}
+    for i in range(1, 6):
+        w = sf(first_row.get(f"weight_attribute_{i}"), 0.0)
+        if w == 0.0:
+            continue
+        attributes[f"attribute_{i}"] = {
+            "weight":    w,
+            "direction": sf_str(first_row.get(f"direction_attribute_{i}"), "—"),
+            "name":      sf_str(first_row.get(f"name_attribute_{i}"),      f"Attribute {i}"),
+            "min":       sf(first_row.get(f"attribute_{i}_min"), 0.0),
+            "max":       sf(first_row.get(f"attribute_{i}_max"), 1.0),
+        }
+
+    product_info = {
+        "cu_product_name": sf_str(first_row.get("cu_product"), product),
+        "al_product_name": sf_str(first_row.get("al_product"), "Al product"),
+        "num_regions":     len(regions),
+        "attributes":      attributes,
+        "avg_tau":         sf(df["tau_value"].replace([np.inf, -np.inf], np.nan).mean(), None),
+        "avg_observed_ms": sf(df["copper_product_market_share"].mean(), None),
+    }
+
+
     # ── Write JSON ─────────────────────────────────────────────────────────
     payload = {
         "product":        product,
@@ -159,6 +189,7 @@ def export_product(pdf_path, output_dir="docs/data"):
         "sanity_check":   sanity,
         "region_params":  region_params,
         "price_meta":     price_meta,
+        "product_info": product_info,
     }
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -184,7 +215,6 @@ def export_all(pdf_dir="iter9_pdfs", output_dir="docs/data"):
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
     print(f"\nManifest → {manifest_path}: {products}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

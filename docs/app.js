@@ -193,6 +193,62 @@ function initPriceExplorer() {
   renderExplorer();
 }
 
+function renderOverview() {
+  const el = $("overview-panel");
+  if (!el || !S.data?.product_info) return;
+
+  const pi   = S.data.product_info;
+  const attrs = Object.entries(pi.attributes ?? {});
+  const totalWeight = attrs.reduce((s, [, a]) => s + a.weight, 0);
+
+  // ── Attribute rows ───────────────────────────────────────────────────
+  const attrRows = attrs.map(([key, a]) => {
+    const pct     = totalWeight > 0 ? (a.weight / totalWeight * 100).toFixed(1) : 0;
+    const dirIcon = a.direction === "positive" ? "↑" : a.direction === "negative" ? "↓" : "—";
+    const dirCls  = a.direction === "positive" ? "dir-pos" : a.direction === "negative" ? "dir-neg" : "";
+    return `
+      <div class="attr-row">
+        <span class="attr-name">${key}</span>
+        <span class="attr-dir ${dirCls}">${dirIcon}</span>
+        <div class="attr-bar-wrap">
+          <div class="attr-bar" style="width:${pct}%"></div>
+        </div>
+        <span class="attr-pct">${pct}%</span>
+      </div>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="overview-products">
+      <div class="overview-material cu-side">
+        <span class="mat-dot" style="background:#b45309"></span>
+        <div>
+          <div class="mat-label">Copper product</div>
+          <div class="mat-name">${pi.cu_product_name}</div>
+        </div>
+      </div>
+      <div class="overview-vs">vs</div>
+      <div class="overview-material al-side">
+        <span class="mat-dot" style="background:#6366f1"></span>
+        <div>
+          <div class="mat-label">Aluminum product</div>
+          <div class="mat-name">${pi.al_product_name}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-stats">
+      <div class="stat-chip">${pi.num_regions} regions</div>
+      ${pi.avg_tau   != null ? `<div class="stat-chip">avg τ = ${pi.avg_tau.toFixed(3)}</div>` : ""}
+      ${pi.avg_observed_ms != null ? `<div class="stat-chip">avg observed share = ${(pi.avg_observed_ms*100).toFixed(1)}%</div>` : ""}
+    </div>
+
+    <div class="overview-attrs">
+      <div class="attrs-title">Attribute weights</div>
+      ${attrRows}
+    </div>
+  `;
+}
+
 function renderExplorer() {
   if (!$("chart-explorer")) return;
   if (!S.data?.region_params || S.cuPrice == null) return;
@@ -576,6 +632,7 @@ function buildRegionList(regions) {
 }
 
 function renderAll() {
+  renderOverview();
   const isRatio = S.graphType === "ratio";
   $("card-explorer").classList.toggle("hidden", S.graphType === "ratio");
   $("card-fit-curves").classList.toggle("hidden", !isRatio);

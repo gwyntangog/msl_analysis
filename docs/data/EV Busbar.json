@@ -4924,5 +4924,49 @@
     "al_max": 20000,
     "cu_step": 100,
     "al_step": 50
+  },
+  "product_info": {
+    "cu_product_name": "EV HV DC Link Laminated Busbar",
+    "al_product_name": "EV HV DC Link Laminated Busbar",
+    "num_regions": 4,
+    "attributes": {
+      "attribute_1": {
+        "weight": 0.3,
+        "direction": "negative",
+        "name": "Attribute 1",
+        "min": 15.056000000000001,
+        "max": 38.95
+      },
+      "attribute_2": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 2",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "attribute_3": {
+        "weight": 0.2,
+        "direction": "negative",
+        "name": "Attribute 3",
+        "min": 0.74,
+        "max": 1.15
+      },
+      "attribute_4": {
+        "weight": 0.15,
+        "direction": "positive",
+        "name": "Attribute 4",
+        "min": 35.0,
+        "max": 58.0
+      },
+      "attribute_5": {
+        "weight": 0.15,
+        "direction": "positive",
+        "name": "Attribute 5",
+        "min": 5.5,
+        "max": 9.5
+      }
+    },
+    "avg_tau": 0.5175591693557506,
+    "avg_observed_ms": 0.5675
   }
 }

@@ -4924,5 +4924,49 @@
     "al_max": 20000,
     "cu_step": 100,
     "al_step": 50
+  },
+  "product_info": {
+    "cu_product_name": "138kV XLPE Cu 500mm\u00b2 Underground Transmission Cable",
+    "al_product_name": "138kV XLPE Al 800mm\u00b2 Underground Transmission Cable",
+    "num_regions": 4,
+    "attributes": {
+      "attribute_1": {
+        "weight": 0.3,
+        "direction": "negative",
+        "name": "Attribute 1",
+        "min": 150000.0,
+        "max": 3000000.0
+      },
+      "attribute_2": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 2",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "attribute_3": {
+        "weight": 0.2,
+        "direction": "negative",
+        "name": "Attribute 3",
+        "min": 95.0,
+        "max": 2500.0
+      },
+      "attribute_4": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 4",
+        "min": 69.0,
+        "max": 500.0
+      },
+      "attribute_5": {
+        "weight": 0.1,
+        "direction": "negative",
+        "name": "Attribute 5",
+        "min": 1.0,
+        "max": 100.0
+      }
+    },
+    "avg_tau": 0.4202821542838614,
+    "avg_observed_ms": 0.5
   }
 }

@@ -4924,5 +4924,49 @@
     "al_max": 20000,
     "cu_step": 100,
     "al_step": 50
+  },
+  "product_info": {
+    "cu_product_name": "EV Wire Harness",
+    "al_product_name": "EV Wire Harness",
+    "num_regions": 4,
+    "attributes": {
+      "attribute_1": {
+        "weight": 0.25,
+        "direction": "negative",
+        "name": "Attribute 1",
+        "min": 400.0,
+        "max": 1200.0
+      },
+      "attribute_2": {
+        "weight": 0.15,
+        "direction": "positive",
+        "name": "Attribute 2",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "attribute_3": {
+        "weight": 0.2,
+        "direction": "negative",
+        "name": "Attribute 3",
+        "min": 25.0,
+        "max": 50.0
+      },
+      "attribute_4": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 4",
+        "min": 0.0,
+        "max": 10.0
+      },
+      "attribute_5": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 5",
+        "min": 0.0,
+        "max": 10.0
+      }
+    },
+    "avg_tau": 0.08558255939373731,
+    "avg_observed_ms": 0.8300000000000001
   }
 }

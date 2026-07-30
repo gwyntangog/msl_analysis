@@ -4924,5 +4924,49 @@
     "al_max": 20000,
     "cu_step": 100,
     "al_step": 50
+  },
+  "product_info": {
+    "cu_product_name": "ICE Wire Harness",
+    "al_product_name": "ICE Wire Harness",
+    "num_regions": 4,
+    "attributes": {
+      "attribute_1": {
+        "weight": 0.3,
+        "direction": "negative",
+        "name": "Attribute 1",
+        "min": 75.0,
+        "max": 900.0
+      },
+      "attribute_2": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 2",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "attribute_3": {
+        "weight": 0.2,
+        "direction": "negative",
+        "name": "Attribute 3",
+        "min": 8.0,
+        "max": 60.0
+      },
+      "attribute_4": {
+        "weight": 0.2,
+        "direction": "positive",
+        "name": "Attribute 4",
+        "min": 0.0,
+        "max": 10.0
+      },
+      "attribute_5": {
+        "weight": 0.1,
+        "direction": "negative",
+        "name": "Attribute 5",
+        "min": 5.0,
+        "max": 90.0
+      }
+    },
+    "avg_tau": 0.08560403564724606,
+    "avg_observed_ms": 0.8374999999999999
   }
 }
