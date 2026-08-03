@@ -238,18 +238,19 @@ function renderOverview() {
       </div>
     </div>
 
-    <div class="overview-stats">
-      <div class="stat-chip">${pi.num_regions} regions</div>
-      ${pi.avg_tau   != null ? `<div class="stat-chip">avg τ = ${pi.avg_tau.toFixed(3)}</div>` : ""}
-      ${pi.avg_observed_ms != null ? `<div class="stat-chip">avg observed share = ${(pi.avg_observed_ms*100).toFixed(1)}%</div>` : ""}
-    </div>
-
     <div class="overview-attrs">
       <div class="attrs-title">Attribute weights</div>
       ${attrRows}
     </div>
   `;
 }
+
+// Preview stats removed
+//  <div class="overview-stats">
+//       <div class="stat-chip">${pi.num_regions} regions</div>
+//       ${pi.avg_tau   != null ? `<div class="stat-chip">avg τ = ${pi.avg_tau.toFixed(3)}</div>` : ""}
+//       ${pi.avg_observed_ms != null ? `<div class="stat-chip">avg observed share = ${(pi.avg_observed_ms*100).toFixed(1)}%</div>` : ""}
+//     </div>
 
 function renderExplorer() {
   if (!$("chart-explorer")) return;
