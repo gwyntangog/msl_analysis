@@ -4933,35 +4933,35 @@
       "attribute_1": {
         "weight": 0.25,
         "direction": "negative",
-        "name": "Attribute 1",
+        "name": "Total Cost",
         "min": 1.0,
         "max": 40.0
       },
       "attribute_2": {
         "weight": 0.2,
         "direction": "positive",
-        "name": "Attribute 2",
+        "name": "Material Continuity",
         "min": 0.0,
         "max": 1.0
       },
       "attribute_3": {
         "weight": 0.15,
         "direction": "negative",
-        "name": "Attribute 3",
+        "name": "Mass",
         "min": 0.15,
         "max": 1.5
       },
       "attribute_4": {
         "weight": 0.2,
         "direction": "negative",
-        "name": "Attribute 4",
+        "name": "Cross Sectional Area",
         "min": 50.0,
         "max": 500.0
       },
       "attribute_5": {
         "weight": 0.2,
         "direction": "positive",
-        "name": "Attribute 5",
+        "name": "Connection Reliability",
         "min": 0.0,
         "max": 1.0
       }

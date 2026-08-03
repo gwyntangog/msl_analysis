@@ -39,6 +39,7 @@ def _serial(obj):
 # ── Pipeline ───────────────────────────────────────────────────────────────
 def _run_pipeline(pdf_path):
     df = parse_pdf(pdf_path)
+    df = clean_attribute_name(df)
     df = calc_product_cost(df)
     df = correct_att_2_df(df)
     df = get_true_mins_maxes(df)
@@ -164,7 +165,7 @@ def export_product(pdf_path, output_dir="docs/data"):
         attributes[f"attribute_{i}"] = {
             "weight":    w,
             "direction": sf_str(first_row.get(f"direction_attribute_{i}"), "—"),
-            "name":      sf_str(first_row.get(f"name_attribute_{i}"),      f"Attribute {i}"),
+            "name":      sf_str(first_row.get(f"attribute_{i}")),
             "min":       sf(first_row.get(f"attribute_{i}_min"), 0.0),
             "max":       sf(first_row.get(f"attribute_{i}_max"), 1.0),
         }

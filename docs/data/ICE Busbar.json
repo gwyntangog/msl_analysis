@@ -4933,35 +4933,35 @@
       "attribute_1": {
         "weight": 0.25,
         "direction": "negative",
-        "name": "Attribute 1",
+        "name": "Total Cost",
         "min": 0.5,
         "max": 20.0
       },
       "attribute_2": {
         "weight": 0.25,
         "direction": "positive",
-        "name": "Attribute 2",
+        "name": "Material Continuity",
         "min": 0.0,
         "max": 1.0
       },
       "attribute_3": {
         "weight": 0.2,
         "direction": "positive",
-        "name": "Attribute 3",
+        "name": "Electrical Conductivity",
         "min": 15.0,
         "max": 65.0
       },
       "attribute_4": {
         "weight": 0.15,
         "direction": "negative",
-        "name": "Attribute 4",
+        "name": "Mass",
         "min": 0.01,
         "max": 1.0
       },
       "attribute_5": {
         "weight": 0.15,
         "direction": "positive",
-        "name": "Attribute 5",
+        "name": "Connection Reliability",
         "min": 0.0,
         "max": 10.0
       }

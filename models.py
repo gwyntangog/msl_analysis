@@ -16,6 +16,20 @@ from scipy.optimize import curve_fit
 # PHASE 1: Normal finding tau
 # PHASE 2: Tau callibrate step
 
+def clean_string(s):
+    result = str.split(s,'_')
+    cleaned_s = ""
+    for word in result:
+        cleaned_s += word.capitalize()
+        cleaned_s += " "
+    cleaned_s = cleaned_s.strip()
+    return cleaned_s
+
+def clean_attribute_name(df, num_attributes = 5):
+    for i in range(1,num_attributes+1):
+        df[f"attribute_{i}"] = df[f"attribute_{i}"].apply(clean_string)
+    return df
+
 def unzero(n):
     """
     Compresses the number to be in the range from "almost 0" to "almost 1".
@@ -604,6 +618,7 @@ def try_all_fits(x,y, s_min = 0, s_max = 1):
 ################RUN ALL
 def run_through_file(filename):
     result = parse_pdf(filename)
+    result = clean_attribute_name(result)
     result = calc_product_cost(result)
 
     product = result["cu_product"].iloc[0]
@@ -661,15 +676,29 @@ def run_through_file(filename):
 
 # ── Everything below this line was previously at module level ──────────────
 if __name__ == "__main__":
-    filename = 'iter9_pdfs/solar_array.pdf'
-    result = parse_pdf(filename)
-    result = calc_product_cost(result)
-    result = get_true_mins_maxes(result)
-    print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
-    result = correct_att_2_df(result)
-    print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
-    # result = normalize_attributes(result)
-    # result = calc_utilities(result)
+    filename = 'iter9_pdfs/Solar Array.pdf'
+    # result = parse_pdf(filename)
+    # print(result)
+    # result = calc_product_cost(result)
+    # result = get_true_mins_maxes(result)
+    # print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
+    # result = correct_att_2_df(result)
+    # print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
+    # # result = normalize_attributes(result)
+    # # result = calc_utilities(result)
     # result = tau_callibrate_df(result)
     # result = step_tau_df(result)
     # print(result.columns)
+
+    result = parse_pdf(filename)
+    result = clean_attribute_name(result)
+    # result = calc_product_cost(result)
+    # result = get_true_mins_maxes(result)
+    # result = normalize_attributes(result)
+    # result = correct_att_2_df(result)
+    # result = calc_utilities(result)
+    # result = tau_callibrate_df(result)
+    # result = step_tau_df(result)
+    print(result.columns)
+    print(result[["attribute_1", "attribute_2"]])
+    print(clean_string("another_day"))

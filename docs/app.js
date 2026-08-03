@@ -193,6 +193,7 @@ function initPriceExplorer() {
   renderExplorer();
 }
 
+// render overview
 function renderOverview() {
   const el = $("overview-panel");
   if (!el || !S.data?.product_info) return;
@@ -206,9 +207,10 @@ function renderOverview() {
     const pct     = totalWeight > 0 ? (a.weight / totalWeight * 100).toFixed(1) : 0;
     const dirIcon = a.direction === "positive" ? "↑" : a.direction === "negative" ? "↓" : "—";
     const dirCls  = a.direction === "positive" ? "dir-pos" : a.direction === "negative" ? "dir-neg" : "";
+    const attName = a.name;
     return `
       <div class="attr-row">
-        <span class="attr-name">${key}</span>
+        <span class="attr-name">${attName}</span>
         <span class="attr-dir ${dirCls}">${dirIcon}</span>
         <div class="attr-bar-wrap">
           <div class="attr-bar" style="width:${pct}%"></div>

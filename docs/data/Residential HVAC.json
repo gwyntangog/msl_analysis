@@ -4933,35 +4933,35 @@
       "attribute_1": {
         "weight": 0.25,
         "direction": "negative",
-        "name": "Attribute 1",
+        "name": "Total Cost",
         "min": 50.0,
         "max": 500.0
       },
       "attribute_2": {
         "weight": 0.2,
         "direction": "positive",
-        "name": "Attribute 2",
+        "name": "Material Continuity",
         "min": 0.0,
         "max": 1.0
       },
       "attribute_3": {
         "weight": 0.3,
         "direction": "positive",
-        "name": "Attribute 3",
+        "name": "Thermal Performance",
         "min": 0.5,
         "max": 0.95
       },
       "attribute_4": {
         "weight": 0.1,
         "direction": "negative",
-        "name": "Attribute 4",
+        "name": "Mass",
         "min": 2.0,
         "max": 25.0
       },
       "attribute_5": {
         "weight": 0.15,
         "direction": "positive",
-        "name": "Attribute 5",
+        "name": "Corrosion Resistance",
         "min": 1.0,
         "max": 10.0
       }
