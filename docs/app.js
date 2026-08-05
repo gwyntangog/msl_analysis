@@ -612,15 +612,15 @@ let _dfListenersReady = false;
 function setupDataTableListeners() {
   if (_dfListenersReady) return;
 
-  const search    = $("df-search");
+  // const search    = $("df-search");
   const exportBtn = $("btn-export-df");
 
-  if (!search || !exportBtn) {
+  if (!exportBtn) {
     console.warn("Data table elements not found in DOM — check IDs in HTML");
     return;
   }
 
-  search.addEventListener("input", e => renderDataTable(e.target.value));
+  // search.addEventListener("input", e => renderDataTable(e.target.value));
 
   exportBtn.addEventListener("click", () => {
     if (!S.data?.dataframe?.length) return;
@@ -646,13 +646,12 @@ function setupDataTableListeners() {
   _dfListenersReady = true;
 }
 
-function renderDataTable(filter = "") {
+function renderDataTable() {
   if (!S.data?.dataframe?.length) return;
 
   const rows = S.data.dataframe;
   const cols = Object.keys(rows[0]);
 
-  // ── Header — only rebuild when switching products ──────────────────────
   const thead = document.querySelector("#df-table thead");
   if (!thead.innerHTML) {
     thead.innerHTML = `<tr>${cols.map(c =>
@@ -660,17 +659,8 @@ function renderDataTable(filter = "") {
     ).join("")}</tr>`;
   }
 
-  // ── Filter ─────────────────────────────────────────────────────────────
-  const q = filter.toLowerCase().trim();
-  const visible = q
-    ? rows.filter(row =>
-        Object.values(row).some(v =>
-          String(v ?? "").toLowerCase().includes(q)))
-    : rows;
-
-  // ── Body ───────────────────────────────────────────────────────────────
   const tbody = document.querySelector("#df-table tbody");
-  tbody.innerHTML = visible.map(row =>
+  tbody.innerHTML = rows.map(row =>
     `<tr>${cols.map(c => {
       const cls = c === "region" ? " class=\"region-cell\"" : "";
       return `<td${cls}>${fmt(row[c])}</td>`;
@@ -678,7 +668,7 @@ function renderDataTable(filter = "") {
   ).join("");
 
   $("df-caption").textContent =
-    `${visible.length} / ${rows.length} rows · ${cols.length} columns`;
+    `${rows.length} rows · ${cols.length} columns`;
 }
 
 // PRODUCT
@@ -691,7 +681,7 @@ async function loadProduct(product) {
   try {
     S.data       = await fetchJSON(`data/${product}.json`);
     document.querySelector("#df-table thead").innerHTML = "";
-    $("df-search").value = "";
+    // $("df-search").value = "";
     S.selRegions = new Set(S.data.regions);
 
     // Set prices BEFORE renderAll so computeCurve has values to work with
