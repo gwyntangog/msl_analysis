@@ -1,0 +1,13 @@
+{"EV Interconnect": "Battery pack cell-to-cell interconnections evaluated in the model for aluminum substitution, balancing a ~42% mass reduction and lower BOM cost against laser welding and reliability penalties.",
+"EV Busbar": "Rigid high-current powertrain conductors evaluated in the model primarily for high mass savings and direct material cost reduction through aluminum substitution.",
+"Wire Harness": "Vehicle power and signal wiring networks evaluated in the model based on total vehicle mass impact, bundle diameter limits, and architectural redesign requirements.",
+"EV Traction Motor Winding": "Stator electromagnetic coils evaluated in the model under strict volumetric packing and power-density limits that heavily favor copper's high electrical conductivity.",
+"ICE Busbar": "Conventional vehicle distribution channels evaluated in the model for bulk power routing where mass reduction carries a lower premium than in battery-electric vehicles.",
+"ICE Wire Harness": "Low-voltage auxiliary wiring assemblies evaluated in the model for trade-offs among material cost, harness flexibility, and vehicle assembly constraints.",
+"ICE Alternator": "Windings Generator rotor and stator coils evaluated in the model under engine-bay thermal constraints and tight physical volume limits that demand high conductivity.",
+"Commercial HVAC": "Heavy-duty heat exchangers and motor coils evaluated in the model balancing physical footprint, operating pressures, thermal performance, and corrosion risks.",
+"Residential HVAC": "Residential air conditioning and heat pump coils evaluated in the model where lower unit manufacturing cost is weighed against long-term warranty and leak reliability risks.",
+"Distribution Lines": "Medium-voltage utility cables evaluated in the model where flexible trench rights-of-way allow larger aluminum conductor sizes to minimize overall project cost.",
+"Transmission Line": "High-voltage bulk power conduits evaluated in the model under tight duct size constraints and high current loads that favor high-conductivity copper.",
+"Solar Array": "Cables Outdoor direct-current cabling evaluated in the model based on cable weight, cost per meter over long run distances, and terminal connection reliability."
+}

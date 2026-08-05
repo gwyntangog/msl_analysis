@@ -24,6 +24,8 @@ const S = {
   alPrice:      null,
 };
 
+let definitionData = {};
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 const $   = id  => document.getElementById(id);
 const fmt = v   => (v == null ? "—" : typeof v === "number" ? v.toFixed(4) : String(v));
@@ -201,6 +203,7 @@ function renderOverview() {
   const pi   = S.data.product_info;
   const attrs = Object.entries(pi.attributes ?? {});
   const totalWeight = attrs.reduce((s, [, a]) => s + a.weight, 0);
+    const prodDefinition = definitionData?.[S.data.product] ?? "No description available.";
 
   // ── Attribute rows ───────────────────────────────────────────────────
   const attrRows = attrs.map(([key, a]) => {
@@ -237,6 +240,14 @@ function renderOverview() {
         </div>
       </div>
     </div>
+
+      <div>
+        <div class="overview-definition">
+          <div class="def-label">Description</div>
+          <div class="def-text">${prodDefinition}</div>
+        </div>
+      </div>
+      <br>
 
     <div class="overview-attrs">
       <div class="attrs-title">Attribute weights</div>
@@ -558,7 +569,15 @@ function renderFitChart() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function init() {
+
   try {
+     // ── Load definitions once, independently ──────────────────────────
+    try {
+      definitionData = await fetchJSON("manual_data/definitions.json");
+    } catch (e) {
+      console.warn("definitions.json not found — descriptions will be blank.", e.message);
+      definitionData = {};          // graceful fallback; rest of app still works
+    }
     const manifest = await fetchJSON("data/manifest.json");
     if (!manifest.products?.length) { showState("empty"); return; }
     buildProductButtons(manifest.products);

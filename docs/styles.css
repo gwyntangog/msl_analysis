@@ -563,3 +563,28 @@ header {
   border-radius: 4px; transition: width .3s ease;
 }
 .attr-pct { font-size: .7rem; color: var(--muted); text-align: right; }
+
+/* ── Overview definition ─────────────────────────────────────────────────── */
+.overview-definition {
+  margin-top: .75rem;
+  padding: .6rem .85rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid #6366f1;   /* ties to your indigo mat-dot colour */
+  border-radius: var(--r2);
+}
+
+.def-label {
+  font-size: .63rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: .25rem;
+}
+
+.def-text {
+  font-size: .8rem;
+  color: var(--faint);
+  line-height: 1.55;
+}
