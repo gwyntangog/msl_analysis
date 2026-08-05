@@ -605,6 +605,84 @@ function buildProductButtons(products) {
   });
 }
 
+
+// ── Data table ─────────────────────────────────────────────────────────────
+let _dfListenersReady = false;
+
+function setupDataTableListeners() {
+  if (_dfListenersReady) return;
+
+  const search    = $("df-search");
+  const exportBtn = $("btn-export-df");
+
+  if (!search || !exportBtn) {
+    console.warn("Data table elements not found in DOM — check IDs in HTML");
+    return;
+  }
+
+  search.addEventListener("input", e => renderDataTable(e.target.value));
+
+  exportBtn.addEventListener("click", () => {
+    if (!S.data?.dataframe?.length) return;
+    const cols = Object.keys(S.data.dataframe[0]);
+    const csv  = [
+      cols.join(","),
+      ...S.data.dataframe.map(row =>
+        cols.map(c => {
+          const v = row[c] ?? "";
+          return typeof v === "string" ? `"${v}"` : v;
+        }).join(",")
+      ),
+    ].join("\n");
+
+    const a = Object.assign(document.createElement("a"), {
+      href:     URL.createObjectURL(new Blob([csv], { type: "text/csv" })),
+      download: `${S.data.product}_data.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  _dfListenersReady = true;
+}
+
+function renderDataTable(filter = "") {
+  if (!S.data?.dataframe?.length) return;
+
+  const rows = S.data.dataframe;
+  const cols = Object.keys(rows[0]);
+
+  // ── Header — only rebuild when switching products ──────────────────────
+  const thead = document.querySelector("#df-table thead");
+  if (!thead.innerHTML) {
+    thead.innerHTML = `<tr>${cols.map(c =>
+      `<th title="${c}">${cap(c)}</th>`
+    ).join("")}</tr>`;
+  }
+
+  // ── Filter ─────────────────────────────────────────────────────────────
+  const q = filter.toLowerCase().trim();
+  const visible = q
+    ? rows.filter(row =>
+        Object.values(row).some(v =>
+          String(v ?? "").toLowerCase().includes(q)))
+    : rows;
+
+  // ── Body ───────────────────────────────────────────────────────────────
+  const tbody = document.querySelector("#df-table tbody");
+  tbody.innerHTML = visible.map(row =>
+    `<tr>${cols.map(c => {
+      const cls = c === "region" ? " class=\"region-cell\"" : "";
+      return `<td${cls}>${fmt(row[c])}</td>`;
+    }).join("")}</tr>`
+  ).join("");
+
+  $("df-caption").textContent =
+    `${visible.length} / ${rows.length} rows · ${cols.length} columns`;
+}
+
+// PRODUCT
+
 async function loadProduct(product) {
   document.querySelectorAll(".prod-btn").forEach(b =>
     b.classList.toggle("active", b.dataset.p === product));
@@ -612,6 +690,8 @@ async function loadProduct(product) {
   showState("loading");
   try {
     S.data       = await fetchJSON(`data/${product}.json`);
+    document.querySelector("#df-table thead").innerHTML = "";
+    $("df-search").value = "";
     S.selRegions = new Set(S.data.regions);
 
     // Set prices BEFORE renderAll so computeCurve has values to work with
@@ -625,6 +705,7 @@ async function loadProduct(product) {
     renderAll();
     initPriceExplorer();
     showState("content");
+    setupDataTableListeners();
   } catch (e) {
     console.error(e);
     $("state-empty").innerHTML =
@@ -662,6 +743,7 @@ function renderAll() {
   renderFitChart();
   renderFitTable();
   renderSanity();
+  renderDataTable();
 }
 
 // ── Fit table ──────────────────────────────────────────────────────────────
@@ -796,6 +878,8 @@ $("toggle-observed").addEventListener("change", e => {
   S.showObserved = e.target.checked;
   renderChart();
 });
+
+
 
 // $("toggle-fits").addEventListener("change", e => {
 //   S.showFits = e.target.checked;

@@ -179,6 +179,9 @@ def export_product(pdf_path, output_dir="docs/data"):
         "avg_observed_ms": sf(df["copper_product_market_share"].mean(), None),
     }
 
+    # ── Full dataframe export ──────────────────────────────────────────────────
+    df_clean = df.replace([np.inf, -np.inf], np.nan)   # make JSON-safe
+    df_records = json.loads(df_clean.to_json(orient="records"))
 
     # ── Write JSON ─────────────────────────────────────────────────────────
     payload = {
@@ -191,6 +194,7 @@ def export_product(pdf_path, output_dir="docs/data"):
         "region_params":  region_params,
         "price_meta":     price_meta,
         "product_info": product_info,
+        "dataframe":     df_records,
     }
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)

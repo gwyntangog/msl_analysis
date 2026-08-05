@@ -178,6 +178,28 @@
         </div> -->
 
       </div><!-- /state-content -->
+
+      <div class="card" id="card-dataframe">
+  <div class="card-top">
+    <h2>Pipeline Data <span class="hint">full dataframe output</span></h2>
+    <div style="display:flex; gap:.5rem; align-items:center;">
+      <input id="df-search"
+             type="text"
+             placeholder="Filter rows…"
+             class="price-input"
+             style="width:180px" />
+      <button id="btn-export-df" class="btn-xs">Export CSV</button>
+    </div>
+  </div>
+  <div class="scroll-x">
+    <table class="tbl" id="df-table">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="caption" id="df-caption"></div>
+</div>
+
     </main>
   </div><!-- /layout -->
 
