@@ -1,16 +1,26 @@
 {
   "products": [
+    "Building Wire",
     "Commercial HVAC",
+    "Commercial Trunk Lines",
     "Distribution Lines",
+    "Drip Loop Cable",
     "EV Busbar",
     "EV Interconnect",
     "EV Traction Motor Winding",
     "ICE Alternator",
     "ICE Busbar",
     "ICE Wire Harness",
+    "Industrial Trunk Line",
+    "Motors",
     "Residential HVAC",
+    "Residential Trunk Lines",
     "Solar Array",
+    "Solar PV Module",
+    "Transformer",
     "Transmission Line",
+    "Wind Array Cables",
+    "Wind Drip",
     "Wire Harness"
   ]
 }
