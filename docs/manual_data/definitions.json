@@ -1,13 +1,45 @@
-{"EV Interconnect": "Battery pack cell-to-cell interconnections evaluated in the model for aluminum substitution, balancing a ~42% mass reduction and lower BOM cost against laser welding and reliability penalties.",
-"EV Busbar": "Rigid high-current powertrain conductors evaluated in the model primarily for high mass savings and direct material cost reduction through aluminum substitution.",
-"Wire Harness": "Vehicle power and signal wiring networks evaluated in the model based on total vehicle mass impact, bundle diameter limits, and architectural redesign requirements.",
-"EV Traction Motor Winding": "Stator electromagnetic coils evaluated in the model under strict volumetric packing and power-density limits that heavily favor copper's high electrical conductivity.",
-"ICE Busbar": "Conventional vehicle distribution channels evaluated in the model for bulk power routing where mass reduction carries a lower premium than in battery-electric vehicles.",
-"ICE Wire Harness": "Low-voltage auxiliary wiring assemblies evaluated in the model for trade-offs among material cost, harness flexibility, and vehicle assembly constraints.",
-"ICE Alternator": "Windings Generator rotor and stator coils evaluated in the model under engine-bay thermal constraints and tight physical volume limits that demand high conductivity.",
-"Commercial HVAC": "Heavy-duty heat exchangers and motor coils evaluated in the model balancing physical footprint, operating pressures, thermal performance, and corrosion risks.",
-"Residential HVAC": "Residential air conditioning and heat pump coils evaluated in the model where lower unit manufacturing cost is weighed against long-term warranty and leak reliability risks.",
-"Distribution Lines": "Medium-voltage utility cables evaluated in the model where flexible trench rights-of-way allow larger aluminum conductor sizes to minimize overall project cost.",
-"Transmission Line": "High-voltage bulk power conduits evaluated in the model under tight duct size constraints and high current loads that favor high-conductivity copper.",
-"Solar Array": "Cables Outdoor direct-current cabling evaluated in the model based on cable weight, cost per meter over long run distances, and terminal connection reliability."
+{
+  "Building Wire": "Indoor electrical conductors used to wire branch circuits, outlets, switches, and lighting within residential and commercial buildings.",
+
+  "Commercial HVAC": "Heating, ventilation, and air conditioning systems used in large commercial buildings, including chillers, rooftop units, heat exchangers, and associated motor coils.",
+
+  "Commercial Trunk Lines": "Large-gauge feeder conductors that carry power from a commercial service entrance or main panel to downstream sub-panels and distribution points throughout a building.",
+
+  "Distribution Lines": "Medium-voltage utility conductors that carry electricity from substations to end-use customers across neighborhoods and commercial districts.",
+
+  "Drip Loop Cable": "Overhead service-entrance conductors formed into a downward curve at the weatherhead to shed rainwater before the wire enters the meter base or service panel.",
+
+  "EV Busbar": "Rigid high-current conductors that route power between major electrical components within a battery-electric vehicle's powertrain.",
+
+  "EV Interconnect": "Conductive tabs or strips that electrically connect individual battery cells to one another within an electric vehicle battery pack.",
+
+  "EV Traction Motor Winding": "Electromagnetic coils wound into the stator of an electric vehicle traction motor to generate the rotating magnetic field that drives the vehicle.",
+
+  "EV Wire Harness": "Bundled power and signal wiring assemblies that interconnect electrical and electronic systems throughout a battery-electric vehicle.",
+
+  "ICE Alternator": "An onboard generator driven by an internal combustion engine that produces alternating current to charge the vehicle battery and power electrical loads.",
+
+  "ICE Busbar": "Rigid conductors that distribute electrical power among components within a conventional internal combustion engine vehicle's electrical system.",
+
+  "ICE Wire Harness": "Bundled low-voltage wiring assemblies that connect electrical and electronic components throughout a conventional internal combustion engine vehicle.",
+
+  "Industrial Trunk Line": "Heavy-gauge feeder conductors that supply high-ampacity power to industrial loads such as motors, drives, and process equipment within factories and plants.",
+
+  "Motors": "General-purpose electric motors used in industrial and commercial applications, containing stator windings that convert electrical energy into mechanical rotation.",
+
+  "Residential HVAC": "Heating, ventilation, and air conditioning systems used in homes, including split-system air conditioners, heat pumps, and their associated coils and fans.",
+
+  "Residential Trunk Lines": "Main service-entrance and feeder conductors that carry power from the utility meter to the home's main distribution panel.",
+
+  "Solar Array": "Outdoor direct-current cables that connect photovoltaic panels to each other and to inverters within a solar energy installation.",
+
+  "Solar PV Module": "A photovoltaic panel assembly consisting of interconnected solar cells enclosed in a protective frame, which converts sunlight directly into direct-current electricity.",
+
+  "Transformer": "A static electrical device that uses inductive windings to step voltage up or down between two circuits for power transmission or distribution.",
+
+  "Transmission Line": "High-voltage conductors that carry bulk electrical power over long distances from generating stations to regional substations.",
+
+  "Wind Array Cables": "Medium-voltage inter-array cables that connect individual wind turbines to each other and to a collector substation within a wind farm.",
+
+  "Wind Drip": "Flexible power cables routed in a downward loop from a wind turbine's nacelle or tower junction box to prevent water ingress into the electrical enclosure."
 }

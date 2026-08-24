@@ -8,6 +8,7 @@
     "EV Busbar",
     "EV Interconnect",
     "EV Traction Motor Winding",
+    "EV Wire Harness",
     "ICE Alternator",
     "ICE Busbar",
     "ICE Wire Harness",
@@ -20,7 +21,6 @@
     "Transformer",
     "Transmission Line",
     "Wind Array Cables",
-    "Wind Drip",
-    "Wire Harness"
+    "Wind Drip"
   ]
 }
