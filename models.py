@@ -672,33 +672,105 @@ def run_through_file(filename):
     fit_results.to_csv(f"iter9_graphs/{product}/fit_results.csv", index=False)
 
 
+#### CREATE THE TIME SERIES
+def make_time_series(price_series, initial_data, variable="cu", num_attributes=5):
+    """
+    Projects a market-share time series from a sequence of future prices.
+
+    For each price in ``price_series`` the function:
+      1. Computes copper and aluminium utilities at that price using the
+         non-price attributes and weights stored in ``initial_data``.
+      2. Callibrates tau based on the current market share to create the logit model.
+      3. Uses the logit model with the calulcated tau and the next year's price to
+         get the new market share.
+      2. Calculates the copper market share via the logit model (ms_logit).
+      4. Stores the new market share and repeats.
+
+    Unlike point_generation_price (which takes a DataFrame + region label),
+    this function takes a single pre-processed pd.Series row, matching the
+    style of calc_utility_row and step_tau_row.
+
+    Parameters
+    ----------
+    price_series   : array-like
+        Material prices for years 1 … T.  Must have length >= 1.
+    initial_data   : pd.Series
+        One fully-processed DataFrame row.  Required columns:
+            tau_value                      calibrated sensitivity parameter
+            copper_product_market_share    year-0 market share
+            all cost / weight / attribute columns used by calc_utility_row
+    variable       : {"cu", "al"}
+        Which material's price is swept (default "cu").
+    num_attributes : int
+        Number of attributes (default 5).
+
+    Returns
+    -------
+    list[float]
+        Predicted copper market shares [MS_1, ..., MS_T],
+        one value per entry in price_series.
+
+    Raises
+    ------
+    ValueError
+        If variable is not "cu" or "al", or price_series is empty.
+
+    Example
+    -------
+    >>> region_row = result[result["region"] == "India"].iloc[0]
+    >>> cu_prices  = np.arange(5, 15, 1)        # $/kg, years 1-10
+    >>> trajectory = make_time_series(cu_prices, region_row, variable="cu")
+    """
+    if variable not in ("cu", "al"):
+        raise ValueError(f"variable must be 'cu' or 'al', got {variable!r}.")
+
+    price_series = list(price_series)
+    if len(price_series) == 0:
+        raise ValueError("price_series must contain at least one price.")
+
+    row = initial_data.copy()          # never mutates the caller's data
+    tau = float(row["tau_value"])
+    ms_series = []
+
+    def _utilities(p):
+        """Return (cu_utility, al_utility) at material price p."""
+        if variable == "cu":
+            u_cu = calc_utility_row(row, cu_material_cost=p,
+                                    num_attributes=num_attributes, variable="cu")
+            u_al = calc_utility_row(row, cu_material_cost=p,
+                                    num_attributes=num_attributes, variable="al")
+        else:  # "al"
+            u_cu = calc_utility_row(row, al_material_cost=p,
+                                    num_attributes=num_attributes, variable="cu")
+            u_al = calc_utility_row(row, al_material_cost=p,
+                                    num_attributes=num_attributes, variable="al")
+        return u_cu, u_al
+
+    for price in price_series:
+        # calculate utilities at those price points
+        # tau is initiated at the value given by the row
+        u_cu, u_al = _utilities(price)
+        new_ms = ms_logit(u_cu, u_al, tau)
+        ms_series.append(new_ms)
+        tau = tau_callibrate(u_cu, u_al, new_ms) # the next tau value
+        row["copper_product_market_share"] = new_ms
+
+    return ms_series
 
 
 # ── Everything below this line was previously at module level ──────────────
 if __name__ == "__main__":
     filename = 'iter9_pdfs/Solar Array.pdf'
-    # result = parse_pdf(filename)
-    # print(result)
-    # result = calc_product_cost(result)
-    # result = get_true_mins_maxes(result)
-    # print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
-    # result = correct_att_2_df(result)
-    # print(result[["copper_product_market_share","aluminum_product_market_share",'cu_attribute_2_value']])
-    # # result = normalize_attributes(result)
-    # # result = calc_utilities(result)
-    # result = tau_callibrate_df(result)
-    # result = step_tau_df(result)
-    # print(result.columns)
-
     result = parse_pdf(filename)
     result = clean_attribute_name(result)
-    # result = calc_product_cost(result)
-    # result = get_true_mins_maxes(result)
-    # result = normalize_attributes(result)
-    # result = correct_att_2_df(result)
-    # result = calc_utilities(result)
-    # result = tau_callibrate_df(result)
-    # result = step_tau_df(result)
+    result = calc_product_cost(result)
+    result = get_true_mins_maxes(result)
+    result = normalize_attributes(result)
+    result = correct_att_2_df(result)
+    result = calc_utilities(result)
+    result = tau_callibrate_df(result)
+    result = step_tau_df(result)
     print(result.columns)
-    print(result[["attribute_1", "attribute_2"]])
-    print(clean_string("another_day"))
+    sample_price_series = [1,2,3,5]
+    one_row = result.iloc[0]
+    print(make_time_series(sample_price_series, one_row))
