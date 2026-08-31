@@ -725,7 +725,7 @@ function renderTimeChart() {
   });
 
   $("chart-time-caption").textContent =
-    `${cap(S.data.product)}  ·  ${S.fitType} fit vs model curve`;
+    `${cap(S.data.product)}  ·  market share prediction over time`;
 }
 
 
