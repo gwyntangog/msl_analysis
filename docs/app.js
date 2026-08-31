@@ -125,6 +125,78 @@ function computeCurve(p, gType, cuPrice, alPrice) {
   });
 }
 
+function tauCallibrate(utility_cu, utility_al, market_share_cu){
+  let mc = Math.max(10 ** -9, Math.min(market_share_cu, 1 - 10 ** -9));
+  if (mc == 0.5){
+      return Infinity;
+  }
+  else {
+      const tau = (utility_cu-utility_al)/(Math.log(mc)-Math.log(1-mc));
+      return tau;
+  }
+  }
+
+// function computeTimeSeries(p, price_list){
+
+//   let ms_series = [];
+//   let tau = p.tau_value ?? 1;
+//   // let cuKg =  p[`copper_price_per_kg`];
+//   let alKg = p[`aluminum_price_per_kg`];
+//   let u_cu, u_al, new_ms;
+//   for (let price of price_list){
+//     u_cu = utilityJS(p, price, alKg, "cu", 5);
+//     u_al = utilityJS(p, price, alKg, "al", 5);
+//     new_ms = logitMS(u_cu, u_al, tau);
+//     ms_series.push(new_ms);
+//     tau = tauCallibrate(u_cu, u_al, new_ms);
+//   }
+//   return ms_series;
+// }
+
+function computeTimeSeries(p, priceList, variable = "cu", numAttributes = 5) {
+  if (variable !== "cu" && variable !== "al") {
+    throw new Error(`variable must be "cu" or "al", got ${variable}`);
+  }
+
+  if (!priceList || priceList.length === 0) {
+    throw new Error("priceList must contain at least one price.");
+  }
+
+  // Don't mutate S.data.region_params
+  const row = { ...p };
+
+  let tau = Number(row.tau_value);
+  const msSeries = [];
+
+  function utilities(price) {
+    if (variable === "cu") {
+      return [
+        utilityJS(row, price, row.aluminum_price_per_kg, "cu", numAttributes),
+        utilityJS(row, price, row.aluminum_price_per_kg, "al", numAttributes),
+      ];
+    }
+
+    return [
+      utilityJS(row, row.copper_price_per_kg, price, "cu", numAttributes),
+      utilityJS(row, row.copper_price_per_kg, price, "al", numAttributes),
+    ];
+  }
+
+  for (const price of priceList) {
+    const [uCu, uAl] = utilities(price);
+
+    const newMs = logitMS(uCu, uAl, tau);
+
+    msSeries.push(newMs);
+
+    tau = tauCallibrate(uCu, uAl, newMs);
+
+    row.copper_product_market_share = newMs;
+  }
+
+  return msSeries;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  PRICE EXPLORER  (bar chart)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -368,27 +440,27 @@ function renderChart() {
     });
 
     // ── Observed point ──────────────────────────────────────────────────
-    if (S.showObserved) {
-      let obsX;
-      if      (gType === "copper_price")   obsX = p.copper_price_per_kg   * 1000;
-      else if (gType === "aluminum_price") obsX = p.aluminum_price_per_kg * 1000;
-      else /* ratio */                     obsX = p.aluminum_price_per_kg > 0
-        ? p.copper_price_per_kg / p.aluminum_price_per_kg
-        : null;
+    // if (S.showObserved) {
+    //   let obsX;
+    //   if      (gType === "copper_price")   obsX = p.copper_price_per_kg   * 1000;
+    //   else if (gType === "aluminum_price") obsX = p.aluminum_price_per_kg * 1000;
+    //   else /* ratio */                     obsX = p.aluminum_price_per_kg > 0
+    //     ? p.copper_price_per_kg / p.aluminum_price_per_kg
+    //     : null;
 
-      if (obsX != null) {
-        traces.push({
-          x: [obsX], y: [p.copper_product_market_share],
-          type: "scatter", mode: "markers",
-          name: `${r} (obs)`, showlegend: false,
-          marker: { color: c, size: 9, symbol: "circle",
-                    line: { color: "#fff", width: 1.5 } },
-          hovertemplate:
-            `<b>${r} — observed</b><br>${labels.x}: %{x:.2f}<br>` +
-            `${labels.y}: %{y:.3f}<extra></extra>`,
-        });
-      }
-    }
+    //   if (obsX != null) {
+    //     traces.push({
+    //       x: [obsX], y: [p.copper_product_market_share],
+    //       type: "scatter", mode: "markers",
+    //       name: `${r} (obs)`, showlegend: false,
+    //       marker: { color: c, size: 9, symbol: "circle",
+    //                 line: { color: "#fff", width: 1.5 } },
+    //       hovertemplate:
+    //         `<b>${r} — observed</b><br>${labels.x}: %{x:.2f}<br>` +
+    //         `${labels.y}: %{y:.3f}<extra></extra>`,
+    //     });
+    //   }
+    // }
   });
 
   // ── Fit overlays (ratio tab only) ──────────────────────────────────────
@@ -563,6 +635,90 @@ function renderFitChart() {
     `${cap(S.data.product)}  ·  ${S.fitType} fit vs model curve`;
 }
 
+ //-------------- render time chart
+function renderTimeChart() {
+  if (!S.data) return;
+
+  const regions  = S.data.regions.filter(r => S.selRegions.has(r));
+  // const xs       = linspace(10, 100, 100);
+  // const { s_min, s_max } = S.data.fit_bounds;
+  const traces   = [];
+
+  regions.forEach(r => {
+    const fit = S.data.fit_results.find(f => f.region === r);
+    const p   = S.data.region_params?.[r];
+    if (!fit || !p) return;
+    const c = colorFor(r);
+
+    // ── Actual computed curve (dashed, for reference) ──────────────────
+    const xs = linspace(10, 100, 1);
+    const ysActual = computeTimeSeries(p, xs, "cu");
+    console.log(xs);
+    // const ysActual = computeTimeSeries(p, xs);
+    traces.push({
+      x: xs, y: ysActual,
+      type: "scatter", mode: "lines", name: `${r} (model)`,
+      opacity: 0.45,
+      line: { color: c, width: 2.2 },
+      hovertemplate: `<b>${r} model</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+    });
+
+    // ── Fit curve ──────────────────────────────────────────────────────
+    // let ysFit;
+    // if (S.fitType === "poly" && fit.poly_a != null) {
+    //   ysFit = xs.map(x => fit.poly_a + fit.poly_b * x);
+    // } else if (S.fitType === "power" && fit.power_alpha != null) {
+    //   ysFit = xs.map(x => fit.power_alpha * Math.exp(fit.power_beta * x));
+    // } else if (S.fitType === "logit" && fit.logit_alpha != null) {
+    //   ysFit = xs.map(x =>
+    //     s_min + (s_max - s_min) / (1 + Math.exp(fit.logit_alpha * (x - fit.logit_beta)))
+    //   );
+    // }
+
+    // if (ysFit) {
+    //   traces.push({
+    //     x: xs, y: ysFit,
+    //     type: "scatter", mode: "lines", name: `${r} (${S.fitType} fit)`,
+    //     opacity: 1,
+    //      line: { color: c, width: 1.5, dash: "dot" },
+    //     hovertemplate: `<b>${r} ${S.fitType} fit</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+    //   });
+    // }
+  });
+
+  const layout = {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor:  "rgba(0,0,0,0)",
+    font: { color: "#1e293b", family: "Inter, sans-serif", size: 12 },
+    xaxis: {
+      title: { text: "Cu / Al Price Ratio", standoff: 8 },
+      gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569",
+    },
+    yaxis: {
+      title: { text: "Cu Product Market Share", standoff: 8 },
+      range: [-0.05, 1.05],
+      gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569",
+    },
+    legend: {
+      bgcolor: "rgba(0,0,0,0)", bordercolor: "#cbd5e1",
+      font: { size: 11, color: "#1e293b" },
+    },
+    margin: { t: 28, r: 18, b: 52, l: 60 },
+    hovermode: "closest",
+  };
+
+  Plotly.react("chart-time", traces, layout, {
+    responsive: true, displayModeBar: false,
+  });
+
+  $("chart-time-caption").textContent =
+    `${cap(S.data.product)}  ·  ${S.fitType} fit vs model curve`;
+}
+
+
+
+
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  BOOT
@@ -719,6 +875,7 @@ function buildRegionList(regions) {
       renderChart();
       renderExplorer();
       renderFitChart();
+      renderTimeChart();
     });
     el.appendChild(label);
   });
@@ -732,6 +889,7 @@ function renderAll() {
   renderChart();
   renderFitChart();
   renderFitTable();
+  renderTimeChart();
   renderSanity();
   renderDataTable();
 }
@@ -855,13 +1013,13 @@ $("fit-tabs").addEventListener("click", e => {
 $("btn-all").addEventListener("click", () => {
   S.selRegions = new Set(S.data?.regions ?? []);
   document.querySelectorAll("#region-list input").forEach(c => c.checked = true);
-  renderChart(); renderExplorer(); renderFitChart();
+  renderChart(); renderExplorer(); renderFitChart(); renderTimeChart();
 });
 
 $("btn-none").addEventListener("click", () => {
   S.selRegions = new Set();
   document.querySelectorAll("#region-list input").forEach(c => c.checked = false);
-  renderChart(); renderExplorer(); renderFitChart();
+  renderChart(); renderExplorer(); renderFitChart(); renderTimeChart();
 });
 
 $("toggle-observed").addEventListener("change", e => {
