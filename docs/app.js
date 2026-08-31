@@ -644,6 +644,16 @@ function renderTimeChart() {
   // const { s_min, s_max } = S.data.fit_bounds;
   const traces   = [];
 
+  const years = [
+      2027, 2028, 2029, 2030, 2031,
+      2032, 2033, 2034, 2035
+    ];
+
+  const copperPrices = [
+    9.90, 10.08, 10.21, 10.30, 10.41,
+    10.52, 10.63, 10.74, 10.85
+  ];
+
   regions.forEach(r => {
     const fit = S.data.fit_results.find(f => f.region === r);
     const p   = S.data.region_params?.[r];
@@ -651,47 +661,50 @@ function renderTimeChart() {
     const c = colorFor(r);
 
     // ── Actual computed curve (dashed, for reference) ──────────────────
-    const xs = linspace(10, 100, 1);
+    const xs = copperPrices;
     const ysActual = computeTimeSeries(p, xs, "cu");
-    console.log(xs);
+    // console.log(xs);
     // const ysActual = computeTimeSeries(p, xs);
     traces.push({
-      x: xs, y: ysActual,
-      type: "scatter", mode: "lines", name: `${r} (model)`,
+      x: years,
+      y: ysActual,
+      customdata: copperPrices,
+      type: "scatter",
+      mode: "lines",
+      name: `${r} (model)`,
       opacity: 0.45,
       line: { color: c, width: 2.2 },
-      hovertemplate: `<b>${r} model</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+      hovertemplate:
+        `<b>${r} model</b>` +
+        `<br>Year: %{x}` +
+        `<br>Copper price: $%{customdata:.2f}/kg` +
+        `<br>Share: %{y:.3f}` +
+        `<extra></extra>`,
     });
+    // traces.push({
+    //   x: years, y: ysActual,
+    //   type: "scatter", mode: "lines", name: `${r} (model)`,
+    //   opacity: 0.45,
+    //   line: { color: c, width: 2.2 },
+    //   hovertemplate: `<b>${r} model</b><br>Year: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
+    // });
+  }
+);
 
-    // ── Fit curve ──────────────────────────────────────────────────────
-    // let ysFit;
-    // if (S.fitType === "poly" && fit.poly_a != null) {
-    //   ysFit = xs.map(x => fit.poly_a + fit.poly_b * x);
-    // } else if (S.fitType === "power" && fit.power_alpha != null) {
-    //   ysFit = xs.map(x => fit.power_alpha * Math.exp(fit.power_beta * x));
-    // } else if (S.fitType === "logit" && fit.logit_alpha != null) {
-    //   ysFit = xs.map(x =>
-    //     s_min + (s_max - s_min) / (1 + Math.exp(fit.logit_alpha * (x - fit.logit_beta)))
-    //   );
-    // }
-
-    // if (ysFit) {
-    //   traces.push({
-    //     x: xs, y: ysFit,
-    //     type: "scatter", mode: "lines", name: `${r} (${S.fitType} fit)`,
-    //     opacity: 1,
-    //      line: { color: c, width: 1.5, dash: "dot" },
-    //     hovertemplate: `<b>${r} ${S.fitType} fit</b><br>Ratio: %{x:.2f}<br>Share: %{y:.3f}<extra></extra>`,
-    //   });
-    // }
-  });
+//  traces.push({
+//       x: years, y: copperPrices,
+//       type: "scatter", mode: "lines", name: `Price`,
+//       opacity: 0.45,
+//       line: { color: "black", width: 2.2 },
+//       hovertemplate: `<br>Year: %{x:.2f}<br>Copper Price: %{y:.3f}<extra></extra>`,
+//     });
 
   const layout = {
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor:  "rgba(0,0,0,0)",
     font: { color: "#1e293b", family: "Inter, sans-serif", size: 12 },
     xaxis: {
-      title: { text: "Cu / Al Price Ratio", standoff: 8 },
+      title: { text: "Year", standoff: 8 },
       gridcolor: "#e2e8f0", zerolinecolor: "#cbd5e1", color: "#475569",
     },
     yaxis: {
